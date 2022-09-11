@@ -1,0 +1,16 @@
+{
+  "hash": "533b0c88c2e0a4307b882a9b695d4e30",
+  "result": {
+    "markdown": "---\ntitle: \"Calculate LST and NVDI\"\neditor_options: \n  chunk_output_type: console\n---\n\n::: {.cell}\n\n```{.r .cell-code}\n# https://downloads.hindawi.com/journals/js/2016/1480307.pdf\n# http://www.gisandbeers.com/GeoBazar/Libros/Teledeteccion/Manual-Landsat-9-Handbook.pdf\nlibrary(raster)\n```\n\n::: {.cell-output .cell-output-stderr}\n```\nLoading required package: sp\n```\n:::\n\n```{.r .cell-code}\n# Load data\nd <- \"../../../OneDrive/Data/landstat/LC09_L2SP_202024_20220826_20220830_02_T1/\"\n\nred = raster(file.path(d, \"LC09_L2SP_202024_20220826_20220830_02_T1_SR_B4.TIF\"))\nnear.infrared = raster(file.path(d, \"LC09_L2SP_202024_20220826_20220830_02_T1_SR_B5.TIF\"))\nband_10 = raster(file.path(d, \"LC09_L2SP_202024_20220826_20220830_02_T1_ST_B10.TIF\"))\nmeta <- readLines(file.path(d, \"LC09_L2SP_202024_20220826_20220830_02_T1_MTL.txt\"))\n\nM_L <- meta[stringr::str_detect(meta, \"RADIANCE_MULT_BAND_10\")] |>\n  stringr::str_split(\" = \") |>\n  unlist() |>\n  dplyr::nth(2) |>\n  as.numeric()\n\nA_L <- meta[stringr::str_detect(meta, \"RADIANCE_ADD_BAND_10\")] |>\n  stringr::str_split(\" = \") |>\n  unlist() |>\n  dplyr::nth(2) |>\n  as.numeric()\n\ntoa <- M_L * band_10 + A_L\n\nK_1 <- meta[stringr::str_detect(meta, \"K1_CONSTANT_BAND_10\")] |>\n  stringr::str_split(\" = \") |>\n  unlist() |>\n  dplyr::nth(2) |>\n  as.numeric()\n\nK_2 <- meta[stringr::str_detect(meta, \"K2_CONSTANT_BAND_10\")] |>\n  stringr::str_split(\" = \") |>\n  unlist() |>\n  dplyr::nth(2) |>\n  as.numeric()\n\nBT <- (K_2 / (log(K_1/toa)+1))- 273.15 # kevin to celcius\n\nnvdi_s <- 0.2\nnvdi_v <- 0.5\nnvdi <- (near.infrared - red)/(near.infrared + red)\n\np_v <- nvdi\np_v@data@values <- ((p_v@data@values - nvdi_s)/(nvdi_v-nvdi_s))^2\n\n\n# If nvdi less than 0 then water and emissivity (e_w) is 0.991\n# If nvdi < nvdi_s then emissivity (e_s) is 0.0996\n# If nvdi > nvdi_v then emissivity (e_v) is 0.973\n# if nvdi is between 0.2 and 0.5 then  e_v*P_V + e_s(1-P_V)+C_l\n\ne_w <- 0.991\ne_s <- 0.996\ne_v <- 0.973\nC_l <- 0.005 # correction\n\ne <- p_v\ne@data@values <- ifelse(\n  e@data@values <= 0, e_w, ifelse(\n    e@data@values >0 & e@data@values <= nvdi_s, e_s, ifelse(\n      e@data@values > nvdi_s & e@data@values <= nvdi_v, e_v * e@data@values + e_s * (1-e@data@values) + C_l, e_v\n      )\n  )\n)\n\nlambda <- 10.895 # average limiting wavelength\nrho <- 1.438 * 10e-2 # see paper\n\nLST <- (BT / (1 + (0.0010895 * BT / 1.4388) * log(e)))\nplot(LST)\n```\n\n::: {.cell-output-display}\n![](calculating-lst-and-nvdi_files/figure-html/unnamed-chunk-1-1.png){width=672}\n:::\n:::",
+    "supporting": [
+      "calculating-lst-and-nvdi_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

@@ -1,0 +1,107 @@
+---
+title: Selecting Landsat Data
+---
+
+My approach to selecting data is to take 400 km^2 grid of the UK and select the landsat
+data for each month over the last year that has the least cloud cover. 
+
+
+```{r}
+library(rnaturalearth)
+library(sf)
+library(ggplot2)
+
+uk <- ne_countries(country= "united kingdom") |>
+  sf::st_as_sf()
+
+uk_grid <- st_make_grid(uk, what = "centers", n = 40) |>
+  st_as_sf()
+
+uk_grid$id <- 1:nrow(uk_grid)
+
+ggplot() +
+  geom_sf(data = uk_grid) + 
+  geom_sf(data = uk, fill = NA) 
+
+uk_grid_clipped <- uk_grid[uk,]
+
+ggplot() +
+  geom_sf(data = uk_grid_clipped)
+
+st_area(uk)/1e6
+# 243,610 km (google)
+
+area <- st_make_grid(uk,  n = 40) |>
+  st_as_sf() |>
+  st_area() / 1e6 |>
+  head()
+
+mean(area) |> as.numeric()
+
+```
+
+
+```{r}
+meta <- readr::read_csv("data/landsat_ot_c2_l2_631c33e385785a47/landsat_ot_c2_l2_631c33e385785a47.txt")
+
+meta |> dplyr::select(
+    PATH = `WRS Path`,
+    ROW = `WRS Row`,
+    `Date Acquired`,
+    `Land Cloud Cover`,
+    `Entity ID`
+  ) |>
+  dplyr::mutate(Month = paste0(substr(`Date Acquired`, 1, 8), "01")) |>
+  dplyr::mutate(ROW = as.numeric(ROW)) |> 
+  dplyr::filter(PATH %in% c(201, 202), ROW == 24) |>
+  dplyr::filter(`Date Acquired` > "2021-06-01") |>
+  dplyr::group_by(Month) |>
+  dplyr::filter(`Land Cloud Cover` == min(`Land Cloud Cover`))
+
+```
+
+
+```{r}
+wrs2_d <- st_read("data/WRS2_descending_0/WRS2_descending.shp")
+wrs2_d <- st_transform(wrs2_d, st_crs(uk_grid_clipped))
+wrs2_d_clipped <- wrs2_d[uk,]
+
+meta <- readr::read_csv("data/landsat_ot_c2_l2_631c33e385785a47/landsat_ot_c2_l2_631c33e385785a47.txt")
+meta <- meta |>
+  dplyr::select(
+    PATH = `WRS Path`,
+    ROW = `WRS Row`,
+    `Date Acquired`,
+    `Land Cloud Cover`,
+    `Entity ID`
+  ) |>
+  dplyr::mutate(Month = paste0(substr(`Date Acquired`, 1, 8), "01")) |>
+  dplyr::group_by(
+    PATH, ROW, Month
+  ) |>
+  dplyr::filter(`Land Cloud Cover` == min(`Land Cloud Cover`)) |>
+  dplyr::mutate(ROW = as.numeric(ROW)) |>
+  dplyr::filter(`Date Acquired` >= "2021-07-01")
+
+```
+
+```{r}
+d <- st_intersects(uk_grid_clipped, wrs2_d_clipped) |> 
+  as.data.frame() 
+  
+path_row <- wrs2_d_clipped[d$col.id,] |>
+  as.data.frame() |>
+  dplyr::select(PATH, ROW)
+
+dplyr::bind_cols(d, path_row) |>
+  dplyr::left_join(meta) |>
+  dplyr::group_by(row.id, Month) |>
+  dplyr::filter(`Land Cloud Cover` == min(`Land Cloud Cover`)) |>
+  dplyr::ungroup() |>
+  dplyr::select(PATH, ROW, `Date Acquired`, `Land Cloud Cover`, `Entity ID`, Month) |>
+  dplyr::distinct() |>
+  dplyr::filter(PATH %in% c(201, 202), ROW == 24) |>
+  dplyr::arrange(`Date Acquired`) |>
+  dplyr::group_by(Month) |>
+  dplyr::filter(`Land Cloud Cover` == min(`Land Cloud Cover`))
+```

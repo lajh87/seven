@@ -1,0 +1,16 @@
+{
+  "hash": "873f7894a5ef2cd22b1806cc069c8997",
+  "result": {
+    "markdown": "---\ntitle: \"Remove Clouds\"\neditor_options: \n  chunk_output_type: console\n---\n\n::: {.cell}\n\n```{.r .cell-code}\n# https://www.rdocumentation.org/packages/raster/versions/3.5-29/topics/mask\n# https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/files/LSDS-1619_Landsat-8-9-C2-L2-ScienceProductGuide-v4.pdf\n# https://rspatial.org/raster/spatial/8-rastermanip.html\n# https://michaelminn.net/tutorials/r-landsat/index.html\n\nlibrary(raster)\n```\n\n::: {.cell-output .cell-output-stderr}\n```\nLoading required package: sp\n```\n:::\n\n```{.r .cell-code}\nd <- \"../../../OneDrive/Data/landstat/LC09_L2SP_202024_20220826_20220830_02_T1/\"\n\nred <- raster(file.path(d, \"LC09_L2SP_202024_20220826_20220830_02_T1_SR_B4.TIF\"))\nqa <- raster(file.path(d, \"LC09_L2SP_202024_20220826_20220830_02_T1_QA_PIXEL.TIF\"))\nqa_lu <- readr::read_csv(\"data/qa_pixel.csv\")\n```\n\n::: {.cell-output .cell-output-stderr}\n```\nWarning: One or more parsing issues, see `problems()` for details\n```\n:::\n\n::: {.cell-output .cell-output-stderr}\n```\nRows: 21 Columns: 14\n```\n:::\n\n::: {.cell-output .cell-output-stderr}\n```\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr (13): Fill, Dilated Cloud, Cirrus, Cloud, Cloud Shadow, Snow, Clear, Wat...\ndbl  (1): Pixel Value\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\n```\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nmask_values <- qa_lu |>\n  dplyr::filter(Cloud == \"Yes\") |>\n  dplyr::pull(`Pixel Value`)\n\nqa[qa %in% mask_values] <- NA\nmr <- mask(red, qa)\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\nplot(red)\n```\n\n::: {.cell-output-display}\n![](mask-clouds_files/figure-html/unnamed-chunk-4-1.png){width=672}\n:::\n\n```{.r .cell-code}\nplot(mr)\n```\n\n::: {.cell-output-display}\n![](mask-clouds_files/figure-html/unnamed-chunk-4-2.png){width=672}\n:::\n:::",
+    "supporting": [
+      "mask-clouds_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

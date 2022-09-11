@@ -1,0 +1,22 @@
+Pixel Value, Fill,Dilated Cloud, Cirrus, Cloud,Cloud Shadow, Snow, Clear, Water, Cloud Conf.,Cloud Shadow Conf.,Snow/Ice Conf., Cirrus Conf., Pixel Description
+1, Yes, No, No, No, No, No, No, No, None, None, None, None, Fill
+21824, No, No, No, No, No, No, Yes, No, Low, Low, Low, Low, Clear with lows set
+21826, No, Yes, No, No, No, No, Yes, No, Low, Low, Low, Low, Dilated cloud over land
+21888, No, No, No, No, No, No, No, Yes, Low, Low, Low, Low, Water with lows set
+21890, No, Yes, No, No, No, No, No, Yes, Low, Low, Low, Low, Dilated cloud over water
+22080, No, No, No, No, No, No, Yes, No, Mid, Low, Low, Low, Mid conf cloud
+22144, No, No, No, No, No, No, No, Yes, Mid, Low, Low, Low, Mid conf cloud over water
+22280, No, No, No, Yes, No, No, No, No, High, Low, Low, Low, High conf Cloud
+23888, No, No, No, No, Yes, No, Yes, No, Low, High, Low, Low, High conf cloud shadow
+23952, No, No, No, No, Yes, No, No, Yes, Low, High, Low, Low, Water with cloud shadow
+24088, No, No, No, Yes, Yes, No, No, No, Mid, High, Low, Low, Mid conf cloud with shadow
+24216, No, No, No, Yes, Yes, No, No, Yes, Mid, High, Low, Low, Mid conf cloud with shadow over water
+24344, No, No, No, Yes, Yes, No, No, No, High, High, Low, Low, High conf cloud with shadow
+24472, No, No, No, Yes, Yes, No, No, Yes, High, High, Low, Low, High conf cloud with shadow over water
+30048, No, No, No, No, No, Yes, Yes, No, Low, Low, High, Low, High conf snow/ice
+54596, No, No, Yes, No, No, No, Yes, No, Low, Low, Low, High, High conf Cirrus
+54852, No, No, Yes, No, No, No, Yes, No, Mid, Low, Low, High, "Cirrus, mid cloud"
+55052, No, No, Yes, Yes, No, No, No, No, High, Low, Low, High, "Cirrus, high cloud"
+56856, No, No, No, Yes, Yes, No, No, No, Mid, High, Low, High, "Cirrus, mid conf cloud, shadow"
+56984, No, No, No, Yes, Yes, No, No, Yes, Mid, High, Low, High, "Cirrus, mid conf cloud, shadow, over water"
+57240, No, No, No, Yes, Yes, No, No, Yes, High, High, Low, High, "Cirrus, high conf cloud, shadow"

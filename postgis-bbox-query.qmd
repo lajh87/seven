@@ -1,0 +1,71 @@
+---
+title: PostgreSQL GIS Query by Bounding Box
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, warning = FALSE, message = FALSE}
+library(rnaturalearth)
+library(sf)
+library(ggplot2)
+source("R/postgis.R")
+```
+
+
+# Geospatial Extent
+
+```{r warning = FALSE, message = FALSE}
+#| fig-cap: "Geospatial Extent"
+#| echo: false
+
+uk <- ne_countries(country = "united kingdom") |> st_as_sf()
+wrs2_d <- read_sf("data/WRS2_descending_0/WRS2_descending.shp")
+p202r24 <- wrs2_d |>
+  dplyr::filter(PATH == "202", ROW == "24")
+p202r24 <- st_transform(p202r24, st_crs(uk))
+
+ggplot() + 
+  geom_sf(data = uk) + 
+  geom_sf(data = p202r24, fill = "black")
+
+```
+
+# Which military sites are in the geospatial extent?
+
+```{r}
+# create bounding box
+bbox <- st_bbox(p202r24)
+
+# query database
+db <- connect_postgres()
+
+# build query
+q <- query_bounding_box(bbox[1], bbox[2], bbox[3], bbox[4], tbl = "mil_boundaries_osm")
+q2 <- query_bounding_box(bbox[1], bbox[2], bbox[3], bbox[4])
+boundaries <- st_read(db, query = q)
+buildings <- st_read(db, query = q2)
+DBI::dbDisconnect(db)
+
+# clip to extent
+boundaries <- boundaries[p202r24,]
+buildings <- buildings[p202r24,]
+```
+
+
+```{r}
+#| fig-cap: "Boundaries"
+ggplot() +
+  geom_sf(data = p202r24, fill = NA, colour = "black", inherit.aes = FALSE) + 
+  geom_sf(data = boundaries, fill = "red", colour = NA, alpha = 0.2, inherit.aes = FALSE)
+
+```
+
+```{r}
+#| fig-cap: "Buildings"
+ggplot() +
+  geom_sf(data = p202r24, fill = NA, colour = "black", inherit.aes = FALSE) + 
+  geom_sf(data = buildings, fill = "red", colour = "red", alpha = 0.2, inherit.aes = FALSE)
+
+```
+

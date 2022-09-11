@@ -1,0 +1,26 @@
+project:
+  type: website
+  output-dir: docs
+  
+website:
+  sidebar:
+    style: "docked"
+    search: true
+    contents:
+      - section: "Basics"
+        contents:
+          - index.qmd
+          - calculating-lst-and-nvdi.qmd
+          - mask-clouds.qmd
+          - postgis-bbox-query.qmd
+          - lst-by-building.qmd
+          - overlapping-sites.qmd
+
+format:
+  html:
+    theme: flatly
+    css: styles.css
+    toc: true
+
+editor: visual
+

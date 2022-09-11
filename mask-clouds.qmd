@@ -1,0 +1,43 @@
+---
+title: "Remove Clouds"
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+```{r}
+# https://www.rdocumentation.org/packages/raster/versions/3.5-29/topics/mask
+# https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/media/files/LSDS-1619_Landsat-8-9-C2-L2-ScienceProductGuide-v4.pdf
+# https://rspatial.org/raster/spatial/8-rastermanip.html
+# https://michaelminn.net/tutorials/r-landsat/index.html
+
+library(raster)
+d <- "../../../OneDrive/Data/landstat/LC09_L2SP_202024_20220826_20220830_02_T1/"
+
+red <- raster(file.path(d, "LC09_L2SP_202024_20220826_20220830_02_T1_SR_B4.TIF"))
+qa <- raster(file.path(d, "LC09_L2SP_202024_20220826_20220830_02_T1_QA_PIXEL.TIF"))
+qa_lu <- readr::read_csv("data/qa_pixel.csv")
+
+```
+
+```{r, include = FALSE}
+f <- list.files(d)
+f[grepl("QA_PIXEL", f)]
+```
+
+
+```{r}
+mask_values <- qa_lu |>
+  dplyr::filter(Cloud == "Yes") |>
+  dplyr::pull(`Pixel Value`)
+
+qa[qa %in% mask_values] <- NA
+mr <- mask(red, qa)
+
+```
+
+```{r}
+plot(red)
+plot(mr)
+```

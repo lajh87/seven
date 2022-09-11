@@ -1,0 +1,240 @@
+---
+title: "What is Land Surface Temperature Building for a given site?"
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(sf)
+library(leaflet)
+library(raster)
+library(ggplot2)
+source("R/postgis.R")
+```
+
+# Objective
+
+Calculate Land Surface Temperature (LST) and assign to building and site. 
+
+# Background
+
+The resolution of satellites is 30m. This limits accuracy; however, mitigated 
+two mitigating factors. One, military buildings are often close together, so observing clusters of small buildings. 
+Two, new satellites are coming online with more precise measurements so method has future applicability.
+
+# Method
+
+1. Define an Area of Interest 
+2. Calculate LST
+3. Summarise by building polygon
+
+# Area of Interest (AOI)
+
+Our area of interst is centered on RAF Brize Norton and the town of Carterton.
+* North West: Solar Farm
+* North East: Village of Curbridge
+* South East: Village of Bampton
+* South West: Village of Filkins
+
+```{r}
+# http://bboxfinder.com/#51.722137,-1.664772,51.777665,-1.530704
+
+lng1 <- -1.664772
+lat1 <- 51.722137
+lng2 <- -1.530704
+lat2 <- 51.777665
+
+bbox <- st_bbox(c(xmin = lng1, xmax = lng2, ymin = lat1, ymax = lat2), crs = 4326)
+bbox <- bbox |> st_as_sfc()
+
+leaflet(options = leafletOptions(minZoom = 13, maxZoom = 18)) |>
+  addTiles() |>
+  fitBounds(lng1, lat1, lng2, lat2) |>
+  setMaxBounds(lng1, lat1, lng2, lat2) |>
+  addPolygons(data = bbox)
+
+```
+
+# Calculate LST for AOI
+
+```{r}
+
+d <- "../../../OneDrive/Data/landstat/LC09_L2SP_202024_20220826_20220830_02_T1/"
+f <- list.files(d)
+b4_tif <- file.path(d, f[grepl("B4", f)])
+b5_tif <- file.path(d, f[grepl("B5", f)])
+b10_tif <- file.path(d, f[grepl("B10", f)])
+meta <- file.path(d, f[grepl("MTL.txt", f)])
+
+# https://downloads.hindawi.com/journals/js/2016/1480307.pdf
+# http://www.gisandbeers.com/GeoBazar/Libros/Teledeteccion/Manual-Landsat-9-Handbook.pdf
+calculate_lst <- function(b4_tif, b5_tif, b10_tif, meta){
+  red = raster(b4_tif)
+  near.infrared = raster(b5_tif)
+  band_10 = raster(b10_tif)
+  meta <- readLines(meta)
+  
+  M_L <- meta[stringr::str_detect(meta, "RADIANCE_MULT_BAND_10")] |>
+    stringr::str_split(" = ") |>
+    unlist() |>
+    dplyr::nth(2) |>
+    as.numeric()
+  
+  A_L <- meta[stringr::str_detect(meta, "RADIANCE_ADD_BAND_10")] |>
+    stringr::str_split(" = ") |>
+    unlist() |>
+    dplyr::nth(2) |>
+    as.numeric()
+  
+  # Top of Atmosphere
+  toa <- M_L * band_10 + A_L
+  
+  K_1 <- meta[stringr::str_detect(meta, "K1_CONSTANT_BAND_10")] |>
+    stringr::str_split(" = ") |>
+    unlist() |>
+    dplyr::nth(2) |>
+    as.numeric()
+  
+  K_2 <- meta[stringr::str_detect(meta, "K2_CONSTANT_BAND_10")] |>
+    stringr::str_split(" = ") |>
+    unlist() |>
+    dplyr::nth(2) |>
+    as.numeric()
+  
+  # Convert to Brightness Temperature
+  BT <- (K_2 / (log(K_1/toa)+1))- 273.15 # kevin to celcius
+  
+  # Calculate NVDI
+  nvdi <- (near.infrared - red)/(near.infrared + red)
+
+  # Calculate Proportion Vegetation
+  nvdi_s <- 0.2
+  nvdi_v <- 0.5
+  p_v <- nvdi
+  p_v@data@values <- ((p_v@data@values - nvdi_s)/(nvdi_v-nvdi_s))^2
+  
+  
+  # Calcualte Emisivity
+  # If nvdi less than 0 then water and emissivity (e_w) is 0.991
+  # If nvdi < nvdi_s then emissivity (e_s) is 0.0996
+  # If nvdi > nvdi_v then emissivity (e_v) is 0.973
+  # if nvdi is between 0.2 and 0.5 then  e_v*P_V + e_s(1-P_V)+C_l
+  
+  e_w <- 0.991
+  e_s <- 0.996
+  e_v <- 0.973
+  C_l <- 0.005 # correction
+  
+  e <- p_v
+  e@data@values <- ifelse(
+    e@data@values <= 0, e_w, ifelse(
+      e@data@values >0 & e@data@values <= nvdi_s, e_s, ifelse(
+        e@data@values > nvdi_s & e@data@values <= nvdi_v, e_v * e@data@values + e_s * (1-e@data@values) + C_l, e_v
+        )
+    )
+  )
+  
+  lambda <- 10.895 # average limiting wavelength
+  rho <- 1.438 * 10e-2 # see paper
+  
+  # Calcualte LST
+  LST <- (BT / (1 + (0.0010895 * BT / 1.4388) * log(e)))
+}
+
+LST <- calculate_lst(b4_tif, b5_tif, b10_tif, meta)
+
+plot(LST)
+```
+
+# Remove Cloud and Water
+
+```{r}
+qa_lu <- readr::read_csv("data/qa_pixel.csv")
+qa <- raster(file.path(d, f[grepl("QA_PIXEL.TIF", f)]))
+
+mask_values <- qa_lu |>
+  dplyr::filter(Cloud == "Yes" | Water == "Yes") |>
+  dplyr::pull(`Pixel Value`)
+
+qa[qa %in% mask_values] <- NA
+LSTm <- mask(LST, qa)
+LSTm[LSTm<0] <- NA
+plot(LSTm)
+```
+
+# Overlay Raster to AOI
+
+```{r}
+# c(xmin = lng1, xmax = lng2, ymin = lat1, ymax = lat2)
+boundary <- raster(ymx=lat2, xmn=lng1, ymn=lat1, xmx=lng2)
+boundary <- projectExtent(boundary, LSTm@crs)
+lst2 <- crop(LST, boundary)
+plot(lst2)
+```
+
+# Bring in Buildings
+
+```{r}
+db <- connect_postgres()
+q <- query_bounding_box(xmin = lng1, xmax = lng2, ymin = lat1, ymax = lat2)
+buildings <- st_read(db, query = q)
+DBI::dbDisconnect(db)
+
+```
+
+
+```{r}
+pal <- colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(lst2),
+  na.color = "transparent")
+
+leaflet(options = leafletOptions(minZoom = 13, maxZoom = 18)) |>
+  addTiles() |>
+  fitBounds(lng1, lat1, lng2, lat2) |>
+  setMaxBounds(lng1, lat1, lng2, lat2) |>
+  addPolygons(data = bbox) |>
+  addRasterImage(lst2, colors = pal, opacity = 0.5) %>%
+  addLegend(pal = pal, values = values(lst2),
+    title = "Surface temp") |>
+  addPolygons(data = buildings, fill = NA, color = "black", weight = 0.8)
+
+```
+
+## Aggregate Raster over Polygon
+
+```{r}
+# https://deepnote.com/@sookyan-siew/R-Aggregate-raster-to-polygon-data-10a3150c-e88d-4776-bae1-4b6dcb9e3916 
+# https://stackoverflow.com/questions/67717866/r-aggregating-raster-to-shapefile-polygons
+# Same projection
+lst3 <- projectRaster(lst2, crs = crs(buildings))
+plot(st_geometry(buildings))
+plot(lst3, add = TRUE)
+plot(st_geometry(buildings), add = TRUE)
+avg_lst <- raster::extract(lst3, buildings, mean, na.rm = TRUE)
+
+buildings$lst <- as.numeric(avg_lst)
+```
+
+```{r}
+pal <- colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), buildings$lst,
+  na.color = "transparent")
+
+leaflet(options = leafletOptions(minZoom = 14, maxZoom = 17)) |>
+   addTiles(group = "OSM (default)") |>
+  addProviderTiles(providers$Stamen.Toner, group = "Toner") |>
+  addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") |>
+  fitBounds(lng1, lat1, lng2, lat2) |>
+  setMaxBounds(lng1, lat1, lng2, lat2) |>
+  addPolygons(data = buildings, fillColor =  ~pal(lst), 
+              color = "black", weight = 0, fillOpacity = 0.8,
+              label = ~round(lst,1),
+              popup = ~paste("<b>ID:</b>", FEATCODE, "<br>", "<b>LST:</b>", round(lst,1))) |>
+   addLegend(pal = pal, values = buildings$lst,
+    title = "Surface temp")   |>
+  addLayersControl(
+    baseGroups = c("OSM (default)", "Toner", "Toner Lite"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+
+
+```
