@@ -2,7 +2,6 @@
 title: Overlaping Sites
 ---
 
-
 ```{r, warning = FALSE, message = FALSE}
 library(sf)
 library(igraph)

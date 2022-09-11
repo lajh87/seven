@@ -15,27 +15,21 @@ source("R/postgis.R")
 
 # Objective
 
-Calculate Land Surface Temperature (LST) and assign to building and site. 
+Calculate Land Surface Temperature (LST) and assign to building and site.
 
 # Background
 
-The resolution of satellites is 30m. This limits accuracy; however, mitigated 
-two mitigating factors. One, military buildings are often close together, so observing clusters of small buildings. 
-Two, new satellites are coming online with more precise measurements so method has future applicability.
+The resolution of satellites is 30m. This limits accuracy; however, mitigated two mitigating factors. One, military buildings are often close together, so observing clusters of small buildings. Two, new satellites are coming online with more precise measurements so method has future applicability.
 
 # Method
 
-1. Define an Area of Interest 
-2. Calculate LST
-3. Summarise by building polygon
+1.  Define an Area of Interest
+2.  Calculate LST
+3.  Summarise by building polygon
 
 # Area of Interest (AOI)
 
-Our area of interst is centered on RAF Brize Norton and the town of Carterton.
-* North West: Solar Farm
-* North East: Village of Curbridge
-* South East: Village of Bampton
-* South West: Village of Filkins
+Our area of interst is centered on RAF Brize Norton and the town of Carterton. \* North West: Solar Farm \* North East: Village of Curbridge \* South East: Village of Bampton \* South West: Village of Filkins
 
 ```{r}
 # http://bboxfinder.com/#51.722137,-1.664772,51.777665,-1.530704
@@ -182,7 +176,6 @@ buildings <- st_read(db, query = q)
 DBI::dbDisconnect(db)
 
 ```
-
 
 ```{r}
 pal <- colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), values(lst2),

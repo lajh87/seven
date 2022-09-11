@@ -2,9 +2,7 @@
 title: Selecting Landsat Data
 ---
 
-My approach to selecting data is to take 400 km^2 grid of the UK and select the landsat
-data for each month over the last year that has the least cloud cover. 
-
+My approach to selecting data is to take 400 km\^2 grid of the UK and select the landsat data for each month over the last year that has the least cloud cover.
 
 ```{r}
 library(rnaturalearth)
@@ -40,7 +38,6 @@ mean(area) |> as.numeric()
 
 ```
 
-
 ```{r}
 meta <- readr::read_csv("data/landsat_ot_c2_l2_631c33e385785a47/landsat_ot_c2_l2_631c33e385785a47.txt")
 
@@ -59,7 +56,6 @@ meta |> dplyr::select(
   dplyr::filter(`Land Cloud Cover` == min(`Land Cloud Cover`))
 
 ```
-
 
 ```{r}
 wrs2_d <- st_read("data/WRS2_descending_0/WRS2_descending.shp")

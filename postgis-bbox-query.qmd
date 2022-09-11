@@ -4,14 +4,12 @@ editor_options:
   chunk_output_type: console
 ---
 
-
 ```{r setup, warning = FALSE, message = FALSE}
 library(rnaturalearth)
 library(sf)
 library(ggplot2)
 source("R/postgis.R")
 ```
-
 
 # Geospatial Extent
 
@@ -52,7 +50,6 @@ boundaries <- boundaries[p202r24,]
 buildings <- buildings[p202r24,]
 ```
 
-
 ```{r}
 #| fig-cap: "Boundaries"
 ggplot() +
@@ -68,4 +65,3 @@ ggplot() +
   geom_sf(data = buildings, fill = "red", colour = "red", alpha = 0.2, inherit.aes = FALSE)
 
 ```
-

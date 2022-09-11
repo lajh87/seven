@@ -1,0 +1,105 @@
+---
+title: Site LST Location Quotient
+---
+
+```{r}
+library(sf)
+library(raster)
+library(leaflet)
+
+source("R/postgis.R")
+source("R/lst.R")
+```
+
+```{r}
+db <- connect_postgres()
+DBI::dbListTables(db)
+
+sites <- st_read(db, "mil_bound_clust_osm")
+DBI::dbDisconnect(db)
+
+```
+
+# Calculate LST for Path and Row
+
+```{r}
+d <- "../../../OneDrive/Data/landstat/LC09_L2SP_202024_20220826_20220830_02_T1/"
+f <- list.files(d)
+b4_tif <- file.path(d, f[grepl("B4", f)])
+b5_tif <- file.path(d, f[grepl("B5", f)])
+b10_tif <- file.path(d, f[grepl("B10", f)])
+meta <- file.path(d, f[grepl("MTL.txt", f)])
+LST <- calculate_lst(b4_tif, b5_tif, b10_tif, meta)
+```
+
+# Remove Cloud and Water
+
+```{r}
+qa <- raster(file.path(d, "LC09_L2SP_202024_20220826_20220830_02_T1_QA_PIXEL.TIF"))
+qa_lu <- readr::read_csv("data/qa_pixel.csv")
+mask_values <- qa_lu |>
+  dplyr::filter(Cloud == "Yes" | Water == "Yes") |>
+  dplyr::pull(`Pixel Value`)
+
+qa[qa %in% mask_values] <- NA
+LSTm <- mask(LST, qa)
+LSTm[LSTm<0] <- NA
+plot(LSTm)
+```
+
+# Calculate LST by Site
+
+```{r}
+lstm2 <- projectRaster(LSTm, crs = crs(sites))
+sites_202024_20220826 <- st_crop(sites, lstm2)
+
+# This takes a while...
+avg_lst <- raster::extract(lstm2, sites_202024_20220826, mean, na.rm = TRUE)
+sites_202024_20220826$lst <- as.numeric(avg_lst)
+mean_lst <- cellStats(lstm2, mean)
+sites_202024_20220826$lst_lq <- sites_202024_20220826$lst/mean_lst
+summary(sites_202024_20220826)
+```
+
+```{r}
+db <- connect_postgres()
+st_write(sites_202024_20220826, db,"sites_202024_20220826")
+DBI::dbDisconnect(db)
+```
+
+
+```{r}
+
+pal <- colorNumeric(c("#0C2C84", "#41B6C4", "#FFFFCC"), sites_202024_20220826$lst_lq,
+  na.color = "transparent")
+
+
+leaflet(options = leafletOptions(minZoom = 8, maxZoom = 17)) |>
+  addTiles(group = "OSM (default)") |>
+  addProviderTiles(providers$Stamen.Toner, group = "Toner") |>
+  addProviderTiles(providers$Stamen.TonerLite, group = "Toner Lite") |>
+  setView(0,52, 8) |>
+  addPolygons(
+    data = sites_202024_20220826, fillColor =  ~pal(lst_lq), 
+    color = "black", weight = 0, fillOpacity = 0.8,
+    label = ~primary_name, 
+    popup = ~paste(
+      cluster, csize, primary_name, 
+      primary_landuse, primary_military, 
+      round(area),
+      round(lst),
+      round(lst_lq, 1),
+      sep = "<br>"
+    )
+  ) |>
+  addLegend(pal = pal, values = sites_202024_20220826$lst_lq,
+    title = "Location Quotient (LST)")   |>
+  addLayersControl(
+    baseGroups = c("OSM (default)", "Toner", "Toner Lite"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+
+
+
+
+```
