@@ -14,13 +14,16 @@ website:
         contents:
           - calculating-lst-and-nvdi.qmd
           - mask-clouds.qmd
-          - postgis-bbox-query.qmd
           - lst-by-building.qmd
           - overlapping-sites.qmd
           - site-lst-ratio.qmd
       - section: "OS API"
         contents:
           - os-api.qmd
+          - os-building-height.qmd
+      - section: "Post GIS"
+        contents:
+          - postgis-bbox-query.qmd
 
 format:
   html:

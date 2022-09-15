@@ -163,6 +163,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <a href="./index.html" class="sidebar-item-text sidebar-link">seven</a>
   </div>
 </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">Landsat</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./calculating-lst-and-nvdi.html" class="sidebar-item-text sidebar-link">Calculate LST and NVDI</a>
@@ -175,17 +185,52 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./postgis-bbox-query.html" class="sidebar-item-text sidebar-link active">PostgreSQL GIS Query by Bounding Box</a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="./lst-by-building.html" class="sidebar-item-text sidebar-link">What is Land Surface Temperature Building for a given site?</a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./overlapping-sites.html" class="sidebar-item-text sidebar-link">Overlaping Sites</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./site-lst-ratio.html" class="sidebar-item-text sidebar-link">Site LST Location Quotient</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">OS API</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./os-api.html" class="sidebar-item-text sidebar-link">Ordnance Survey API</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./os-building-height.html" class="sidebar-item-text sidebar-link">OS Building Height</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">Post GIS</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./postgis-bbox-query.html" class="sidebar-item-text sidebar-link active">PostgreSQL GIS Query by Bounding Box</a>
   </div>
 </li>
       </ul>
@@ -274,11 +319,306 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </figure>
 </div>
 </div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(boundaries)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 6 features and 245 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -2.171208 ymin: 51.20075 xmax: -2.050753 ymax: 51.23485
+Geodetic CRS:  WGS 84
+      osm_id                           name abandoned.landuse access aeroway
+27  97303669           Battlesbury Barracks              &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;
+28  97303671 Warminster Land Warfare Centre              &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;
+29 198746407                       St Giles              &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;
+30 252278280                           &lt;NA&gt;              &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;
+31 252278483                           &lt;NA&gt;              &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;
+32 252278484                           &lt;NA&gt;              &lt;NA&gt;   &lt;NA&gt;    &lt;NA&gt;
+   area building bunker_type description disused.aeroway historic icao  landuse
+27 &lt;NA&gt;     &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;            &lt;NA&gt;     &lt;NA&gt; &lt;NA&gt; military
+28 &lt;NA&gt;     &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;            &lt;NA&gt;     &lt;NA&gt; &lt;NA&gt; military
+29 &lt;NA&gt;     &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;            &lt;NA&gt;     &lt;NA&gt; &lt;NA&gt;     &lt;NA&gt;
+30 &lt;NA&gt;     &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;            &lt;NA&gt;     &lt;NA&gt; &lt;NA&gt; military
+31 &lt;NA&gt;     &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;            &lt;NA&gt;     &lt;NA&gt; &lt;NA&gt; military
+32 &lt;NA&gt;     &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;            &lt;NA&gt;     &lt;NA&gt; &lt;NA&gt; military
+   layer military historic.civilization military_service             operator
+27  &lt;NA&gt; barracks                  &lt;NA&gt;             &lt;NA&gt;                 &lt;NA&gt;
+28  &lt;NA&gt; barracks                  &lt;NA&gt;             &lt;NA&gt;                 &lt;NA&gt;
+29  &lt;NA&gt;     &lt;NA&gt;                  &lt;NA&gt;             &lt;NA&gt; Diocese of Salisbury
+30  &lt;NA&gt; barracks                  &lt;NA&gt;             &lt;NA&gt;                 &lt;NA&gt;
+31  &lt;NA&gt; barracks                  &lt;NA&gt;             &lt;NA&gt;                 &lt;NA&gt;
+32  &lt;NA&gt; barracks                  &lt;NA&gt;             &lt;NA&gt;                 &lt;NA&gt;
+   trench wheelchair  wikidata wikipedia building.colour building.levels fixme
+27   &lt;NA&gt;       &lt;NA&gt; Q19871094      &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;  &lt;NA&gt;
+28   &lt;NA&gt;       &lt;NA&gt; Q19972061      &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;  &lt;NA&gt;
+29   &lt;NA&gt;       &lt;NA&gt;      &lt;NA&gt;      &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;  &lt;NA&gt;
+30   &lt;NA&gt;       &lt;NA&gt;      &lt;NA&gt;      &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;  &lt;NA&gt;
+31   &lt;NA&gt;       &lt;NA&gt;      &lt;NA&gt;      &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;  &lt;NA&gt;
+32   &lt;NA&gt;       &lt;NA&gt;      &lt;NA&gt;      &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;  &lt;NA&gt;
+   image mineshaft_type roof.colour roof.shape alt_name disused old_name source
+27  &lt;NA&gt;           &lt;NA&gt;        &lt;NA&gt;       &lt;NA&gt;     &lt;NA&gt;    &lt;NA&gt;     &lt;NA&gt;   &lt;NA&gt;
+28  &lt;NA&gt;           &lt;NA&gt;        &lt;NA&gt;       &lt;NA&gt;     &lt;NA&gt;    &lt;NA&gt;     &lt;NA&gt;   &lt;NA&gt;
+29  &lt;NA&gt;           &lt;NA&gt;        &lt;NA&gt;       &lt;NA&gt;     &lt;NA&gt;    &lt;NA&gt;     &lt;NA&gt;   &lt;NA&gt;
+30  &lt;NA&gt;           &lt;NA&gt;        &lt;NA&gt;       &lt;NA&gt;     &lt;NA&gt;    &lt;NA&gt;     &lt;NA&gt;   &lt;NA&gt;
+31  &lt;NA&gt;           &lt;NA&gt;        &lt;NA&gt;       &lt;NA&gt;     &lt;NA&gt;    &lt;NA&gt;     &lt;NA&gt;   &lt;NA&gt;
+32  &lt;NA&gt;           &lt;NA&gt;        &lt;NA&gt;       &lt;NA&gt;     &lt;NA&gt;    &lt;NA&gt;     &lt;NA&gt;   &lt;NA&gt;
+   website barrier material note HE_ref abandoned addr.city addr.housename
+27    &lt;NA&gt;    &lt;NA&gt;     &lt;NA&gt; &lt;NA&gt;   &lt;NA&gt;      &lt;NA&gt;      &lt;NA&gt;           &lt;NA&gt;
+28    &lt;NA&gt;    &lt;NA&gt;     &lt;NA&gt; &lt;NA&gt;   &lt;NA&gt;      &lt;NA&gt;      &lt;NA&gt;           &lt;NA&gt;
+29    &lt;NA&gt;    &lt;NA&gt;     &lt;NA&gt; &lt;NA&gt;   &lt;NA&gt;      &lt;NA&gt;      &lt;NA&gt;           &lt;NA&gt;
+30    &lt;NA&gt;    &lt;NA&gt;     &lt;NA&gt; &lt;NA&gt;   &lt;NA&gt;      &lt;NA&gt;      &lt;NA&gt;           &lt;NA&gt;
+31    &lt;NA&gt;    &lt;NA&gt;     &lt;NA&gt; &lt;NA&gt;   &lt;NA&gt;      &lt;NA&gt;      &lt;NA&gt;           &lt;NA&gt;
+32    &lt;NA&gt;    &lt;NA&gt;     &lt;NA&gt; &lt;NA&gt;   &lt;NA&gt;      &lt;NA&gt;      &lt;NA&gt;           &lt;NA&gt;
+   addr.place addr.postcode    amenity building.material building.structure
+27       &lt;NA&gt;          &lt;NA&gt;       &lt;NA&gt;              &lt;NA&gt;               &lt;NA&gt;
+28       &lt;NA&gt;          &lt;NA&gt;       &lt;NA&gt;              &lt;NA&gt;               &lt;NA&gt;
+29       &lt;NA&gt;          &lt;NA&gt; grave_yard              &lt;NA&gt;               &lt;NA&gt;
+30       &lt;NA&gt;          &lt;NA&gt;       &lt;NA&gt;              &lt;NA&gt;               &lt;NA&gt;
+31       &lt;NA&gt;          &lt;NA&gt;       &lt;NA&gt;              &lt;NA&gt;               &lt;NA&gt;
+32       &lt;NA&gt;          &lt;NA&gt;       &lt;NA&gt;              &lt;NA&gt;               &lt;NA&gt;
+   depth derelict field_shelter foot healthcare height heritage
+27  &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt; &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;
+28  &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt; &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;
+29  &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt; &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;
+30  &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt; &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;
+31  &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt; &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;
+32  &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt; &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;
+   heritage.operator highway horse listed_status location natural  ref
+27              &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;          &lt;NA&gt;     &lt;NA&gt;    &lt;NA&gt; &lt;NA&gt;
+28              &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;          &lt;NA&gt;     &lt;NA&gt;    &lt;NA&gt; &lt;NA&gt;
+29              &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;          &lt;NA&gt;     &lt;NA&gt;    &lt;NA&gt; &lt;NA&gt;
+30              &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;          &lt;NA&gt;     &lt;NA&gt;    &lt;NA&gt; &lt;NA&gt;
+31              &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;          &lt;NA&gt;     &lt;NA&gt;    &lt;NA&gt; &lt;NA&gt;
+32              &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;          &lt;NA&gt;     &lt;NA&gt;    &lt;NA&gt; &lt;NA&gt;
+   roof.material roof.structure ruins shelter_type sport start_date surface
+27          &lt;NA&gt;           &lt;NA&gt;  &lt;NA&gt;         &lt;NA&gt;  &lt;NA&gt;       &lt;NA&gt;    &lt;NA&gt;
+28          &lt;NA&gt;           &lt;NA&gt;  &lt;NA&gt;         &lt;NA&gt;  &lt;NA&gt;       &lt;NA&gt;    &lt;NA&gt;
+29          &lt;NA&gt;           &lt;NA&gt;  &lt;NA&gt;         &lt;NA&gt;  &lt;NA&gt;       &lt;NA&gt;    &lt;NA&gt;
+30          &lt;NA&gt;           &lt;NA&gt;  &lt;NA&gt;         &lt;NA&gt;  &lt;NA&gt;       &lt;NA&gt;    &lt;NA&gt;
+31          &lt;NA&gt;           &lt;NA&gt;  &lt;NA&gt;         &lt;NA&gt;  &lt;NA&gt;       &lt;NA&gt;    &lt;NA&gt;
+32          &lt;NA&gt;           &lt;NA&gt;  &lt;NA&gt;         &lt;NA&gt;  &lt;NA&gt;       &lt;NA&gt;    &lt;NA&gt;
+   usage vehicle width airspace historic.period lower_limit upper_limit fenced
+27  &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;   &lt;NA&gt;
+28  &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;   &lt;NA&gt;
+29  &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;   &lt;NA&gt;
+30  &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;   &lt;NA&gt;
+31  &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;   &lt;NA&gt;
+32  &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;   &lt;NA&gt;
+   defensive_works wall waterway operator.type aerodrome.type boundary
+27            &lt;NA&gt; &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt;           &lt;NA&gt;     &lt;NA&gt;
+28            &lt;NA&gt; &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt;           &lt;NA&gt;     &lt;NA&gt;
+29            &lt;NA&gt; &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt;           &lt;NA&gt;     &lt;NA&gt;
+30            &lt;NA&gt; &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt;           &lt;NA&gt;     &lt;NA&gt;
+31            &lt;NA&gt; &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt;           &lt;NA&gt;     &lt;NA&gt;
+32            &lt;NA&gt; &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt;           &lt;NA&gt;     &lt;NA&gt;
+   designation  ele is_in addr.state addr.street covered noname owner
+27        &lt;NA&gt; &lt;NA&gt;  &lt;NA&gt;       &lt;NA&gt;        &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+28        &lt;NA&gt; &lt;NA&gt;  &lt;NA&gt;       &lt;NA&gt;        &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+29        &lt;NA&gt; &lt;NA&gt;  &lt;NA&gt;       &lt;NA&gt;        &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+30        &lt;NA&gt; &lt;NA&gt;  &lt;NA&gt;       &lt;NA&gt;        &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+31        &lt;NA&gt; &lt;NA&gt;  &lt;NA&gt;       &lt;NA&gt;        &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+32        &lt;NA&gt; &lt;NA&gt;  &lt;NA&gt;       &lt;NA&gt;        &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;
+   pillbox.type ref.Cassini ref.pen_number roof.surface iata  religion
+27         &lt;NA&gt;        &lt;NA&gt;           &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt;      &lt;NA&gt;
+28         &lt;NA&gt;        &lt;NA&gt;           &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt;      &lt;NA&gt;
+29         &lt;NA&gt;        &lt;NA&gt;           &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt; christian
+30         &lt;NA&gt;        &lt;NA&gt;           &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt;      &lt;NA&gt;
+31         &lt;NA&gt;        &lt;NA&gt;           &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt;      &lt;NA&gt;
+32         &lt;NA&gt;        &lt;NA&gt;           &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt;      &lt;NA&gt;
+   fence_type short_name addr.housenumber source.outline abandoned.building
+27       &lt;NA&gt;       &lt;NA&gt;             &lt;NA&gt;           &lt;NA&gt;               &lt;NA&gt;
+28       &lt;NA&gt;       &lt;NA&gt;             &lt;NA&gt;           &lt;NA&gt;               &lt;NA&gt;
+29       &lt;NA&gt;       &lt;NA&gt;             &lt;NA&gt;           &lt;NA&gt;               &lt;NA&gt;
+30       &lt;NA&gt;       &lt;NA&gt;             &lt;NA&gt;           &lt;NA&gt;               &lt;NA&gt;
+31       &lt;NA&gt;       &lt;NA&gt;             &lt;NA&gt;           &lt;NA&gt;               &lt;NA&gt;
+32       &lt;NA&gt;       &lt;NA&gt;             &lt;NA&gt;           &lt;NA&gt;               &lt;NA&gt;
+   gun_emplacement_type level place source.name  url construction_date
+27                 &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;        &lt;NA&gt; &lt;NA&gt;              &lt;NA&gt;
+28                 &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;        &lt;NA&gt; &lt;NA&gt;              &lt;NA&gt;
+29                 &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;        &lt;NA&gt; &lt;NA&gt;              &lt;NA&gt;
+30                 &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;        &lt;NA&gt; &lt;NA&gt;              &lt;NA&gt;
+31                 &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;        &lt;NA&gt; &lt;NA&gt;              &lt;NA&gt;
+32                 &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;        &lt;NA&gt; &lt;NA&gt;              &lt;NA&gt;
+   defensive tank_trap addr.district addr.village source.geometry ref.esher
+27      &lt;NA&gt;      &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;            &lt;NA&gt;      &lt;NA&gt;
+28      &lt;NA&gt;      &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;            &lt;NA&gt;      &lt;NA&gt;
+29      &lt;NA&gt;      &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;            &lt;NA&gt;      &lt;NA&gt;
+30      &lt;NA&gt;      &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;            &lt;NA&gt;      &lt;NA&gt;
+31      &lt;NA&gt;      &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;            &lt;NA&gt;      &lt;NA&gt;
+32      &lt;NA&gt;      &lt;NA&gt;          &lt;NA&gt;         &lt;NA&gt;            &lt;NA&gt;      &lt;NA&gt;
+   ref.thekeep source.building wikimedia_commons wikimedia_commons.pano
+27        &lt;NA&gt;            &lt;NA&gt;              &lt;NA&gt;                   &lt;NA&gt;
+28        &lt;NA&gt;            &lt;NA&gt;              &lt;NA&gt;                   &lt;NA&gt;
+29        &lt;NA&gt;            &lt;NA&gt;              &lt;NA&gt;                   &lt;NA&gt;
+30        &lt;NA&gt;            &lt;NA&gt;              &lt;NA&gt;                   &lt;NA&gt;
+31        &lt;NA&gt;            &lt;NA&gt;              &lt;NA&gt;                   &lt;NA&gt;
+32        &lt;NA&gt;            &lt;NA&gt;              &lt;NA&gt;                   &lt;NA&gt;
+   wikimedia_commons_1 brand man_made structure description.de description.en
+27                &lt;NA&gt;  &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt;
+28                &lt;NA&gt;  &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt;
+29                &lt;NA&gt;  &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt;
+30                &lt;NA&gt;  &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt;
+31                &lt;NA&gt;  &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt;
+32                &lt;NA&gt;  &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt;
+   maxspeed maxspeed.type name.en ruins.building tourism name.cy
+27     &lt;NA&gt;          &lt;NA&gt;    &lt;NA&gt;           &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;
+28     &lt;NA&gt;          &lt;NA&gt;    &lt;NA&gt;           &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;
+29     &lt;NA&gt;          &lt;NA&gt;    &lt;NA&gt;           &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;
+30     &lt;NA&gt;          &lt;NA&gt;    &lt;NA&gt;           &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;
+31     &lt;NA&gt;          &lt;NA&gt;    &lt;NA&gt;           &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;
+32     &lt;NA&gt;          &lt;NA&gt;    &lt;NA&gt;           &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;
+   operational_status colour end_date fixme2 historic.military electrified
+27               &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;   &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;
+28               &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;   &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;
+29               &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;   &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;
+30               &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;   &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;
+31               &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;   &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;
+32               &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;   &lt;NA&gt;              &lt;NA&gt;        &lt;NA&gt;
+   admin_level leisure postal_code shooting training_ground fhrs.id source.addr
+27        &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt;
+28        &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt;
+29        &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt;
+30        &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt;
+31        &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt;
+32        &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt;
+   addr.country addr.suburb created_by military_1 name.de name.fr name.ru
+27         &lt;NA&gt;        &lt;NA&gt;       &lt;NA&gt;       &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;
+28         &lt;NA&gt;        &lt;NA&gt;       &lt;NA&gt;       &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;
+29         &lt;NA&gt;        &lt;NA&gt;       &lt;NA&gt;       &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;
+30         &lt;NA&gt;        &lt;NA&gt;       &lt;NA&gt;       &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;
+31         &lt;NA&gt;        &lt;NA&gt;       &lt;NA&gt;       &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;
+32         &lt;NA&gt;        &lt;NA&gt;       &lt;NA&gt;       &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;    &lt;NA&gt;
+   name.uk office pillbox_type source.shape addr.county ref.GB.uprn
+27    &lt;NA&gt;   &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;
+28    &lt;NA&gt;   &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;
+29    &lt;NA&gt;   &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;
+30    &lt;NA&gt;   &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;
+31    &lt;NA&gt;   &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;
+32    &lt;NA&gt;   &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;
+   seamark.restricted_area.restriction seamark.type shop contact.website
+27                                &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt;            &lt;NA&gt;
+28                                &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt;            &lt;NA&gt;
+29                                &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt;            &lt;NA&gt;
+30                                &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt;            &lt;NA&gt;
+31                                &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt;            &lt;NA&gt;
+32                                &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt;            &lt;NA&gt;
+   ref.cadw Military_Unit.1 Military_Unit.2 Military_Unit.3 lanes oneway
+27     &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;
+28     &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;
+29     &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;
+30     &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;
+31     &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;
+32     &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;  &lt;NA&gt;   &lt;NA&gt;
+   aerodrome source.icao closed heritage.website private length type
+27      &lt;NA&gt;        &lt;NA&gt;   &lt;NA&gt;             &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt; &lt;NA&gt;
+28      &lt;NA&gt;        &lt;NA&gt;   &lt;NA&gt;             &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt; &lt;NA&gt;
+29      &lt;NA&gt;        &lt;NA&gt;   &lt;NA&gt;             &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt; &lt;NA&gt;
+30      &lt;NA&gt;        &lt;NA&gt;   &lt;NA&gt;             &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt; &lt;NA&gt;
+31      &lt;NA&gt;        &lt;NA&gt;   &lt;NA&gt;             &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt; &lt;NA&gt;
+32      &lt;NA&gt;        &lt;NA&gt;   &lt;NA&gt;             &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt; &lt;NA&gt;
+   fhrs.authority fhrs.local_authority_id phone geograph.id
+27           &lt;NA&gt;                    &lt;NA&gt;  &lt;NA&gt;        &lt;NA&gt;
+28           &lt;NA&gt;                    &lt;NA&gt;  &lt;NA&gt;        &lt;NA&gt;
+29           &lt;NA&gt;                    &lt;NA&gt;  &lt;NA&gt;        &lt;NA&gt;
+30           &lt;NA&gt;                    &lt;NA&gt;  &lt;NA&gt;        &lt;NA&gt;
+31           &lt;NA&gt;                    &lt;NA&gt;  &lt;NA&gt;        &lt;NA&gt;
+32           &lt;NA&gt;                    &lt;NA&gt;  &lt;NA&gt;        &lt;NA&gt;
+   source.addr.postcode bunker.type closest_town  dog leaf_cycle leaf_type
+27                 &lt;NA&gt;        &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt;       &lt;NA&gt;      &lt;NA&gt;
+28                 &lt;NA&gt;        &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt;       &lt;NA&gt;      &lt;NA&gt;
+29                 &lt;NA&gt;        &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt;       &lt;NA&gt;      &lt;NA&gt;
+30                 &lt;NA&gt;        &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt;       &lt;NA&gt;      &lt;NA&gt;
+31                 &lt;NA&gt;        &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt;       &lt;NA&gt;      &lt;NA&gt;
+32                 &lt;NA&gt;        &lt;NA&gt;         &lt;NA&gt; &lt;NA&gt;       &lt;NA&gt;      &lt;NA&gt;
+   bunker website.RAF height.median regiment training not.addr.postcode
+27   &lt;NA&gt;        &lt;NA&gt;          &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;              &lt;NA&gt;
+28   &lt;NA&gt;        &lt;NA&gt;          &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;              &lt;NA&gt;
+29   &lt;NA&gt;        &lt;NA&gt;          &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;              &lt;NA&gt;
+30   &lt;NA&gt;        &lt;NA&gt;          &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;              &lt;NA&gt;
+31   &lt;NA&gt;        &lt;NA&gt;          &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;              &lt;NA&gt;
+32   &lt;NA&gt;        &lt;NA&gt;          &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;              &lt;NA&gt;
+   operator.en disused.natural disused.water military. police tower addr.town
+27        &lt;NA&gt;            &lt;NA&gt;          &lt;NA&gt;      &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;      &lt;NA&gt;
+28        &lt;NA&gt;            &lt;NA&gt;          &lt;NA&gt;      &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;      &lt;NA&gt;
+29        &lt;NA&gt;            &lt;NA&gt;          &lt;NA&gt;      &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;      &lt;NA&gt;
+30        &lt;NA&gt;            &lt;NA&gt;          &lt;NA&gt;      &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;      &lt;NA&gt;
+31        &lt;NA&gt;            &lt;NA&gt;          &lt;NA&gt;      &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;      &lt;NA&gt;
+32        &lt;NA&gt;            &lt;NA&gt;          &lt;NA&gt;      &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;      &lt;NA&gt;
+   inscription tidal email source.postcode tower.type disused.military name.sco
+27        &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;            &lt;NA&gt;       &lt;NA&gt;             &lt;NA&gt;     &lt;NA&gt;
+28        &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;            &lt;NA&gt;       &lt;NA&gt;             &lt;NA&gt;     &lt;NA&gt;
+29        &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;            &lt;NA&gt;       &lt;NA&gt;             &lt;NA&gt;     &lt;NA&gt;
+30        &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;            &lt;NA&gt;       &lt;NA&gt;             &lt;NA&gt;     &lt;NA&gt;
+31        &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;            &lt;NA&gt;       &lt;NA&gt;             &lt;NA&gt;     &lt;NA&gt;
+32        &lt;NA&gt;  &lt;NA&gt;  &lt;NA&gt;            &lt;NA&gt;       &lt;NA&gt;             &lt;NA&gt;     &lt;NA&gt;
+   source.military club disused.landuse abandoned.bunker_type
+27            &lt;NA&gt; &lt;NA&gt;            &lt;NA&gt;                  &lt;NA&gt;
+28            &lt;NA&gt; &lt;NA&gt;            &lt;NA&gt;                  &lt;NA&gt;
+29            &lt;NA&gt; &lt;NA&gt;            &lt;NA&gt;                  &lt;NA&gt;
+30            &lt;NA&gt; &lt;NA&gt;            &lt;NA&gt;                  &lt;NA&gt;
+31            &lt;NA&gt; &lt;NA&gt;            &lt;NA&gt;                  &lt;NA&gt;
+32            &lt;NA&gt; &lt;NA&gt;            &lt;NA&gt;                  &lt;NA&gt;
+   seamark.beacon_cardinal.category seamark.topmark.shape name.old ship.type
+27                             &lt;NA&gt;                  &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;
+28                             &lt;NA&gt;                  &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;
+29                             &lt;NA&gt;                  &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;
+30                             &lt;NA&gt;                  &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;
+31                             &lt;NA&gt;                  &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;
+32                             &lt;NA&gt;                  &lt;NA&gt;     &lt;NA&gt;      &lt;NA&gt;
+   ref.nsa demolished.building amenity.1969.1992 name.1958.1964 name.1969.1992
+27    &lt;NA&gt;                &lt;NA&gt;              &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt;
+28    &lt;NA&gt;                &lt;NA&gt;              &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt;
+29    &lt;NA&gt;                &lt;NA&gt;              &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt;
+30    &lt;NA&gt;                &lt;NA&gt;              &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt;
+31    &lt;NA&gt;                &lt;NA&gt;              &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt;
+32    &lt;NA&gt;                &lt;NA&gt;              &lt;NA&gt;           &lt;NA&gt;           &lt;NA&gt;
+   name.1993.2010 source.1969.1992 source.1993.2010 wikimedia_commons.video
+27           &lt;NA&gt;             &lt;NA&gt;             &lt;NA&gt;                    &lt;NA&gt;
+28           &lt;NA&gt;             &lt;NA&gt;             &lt;NA&gt;                    &lt;NA&gt;
+29           &lt;NA&gt;             &lt;NA&gt;             &lt;NA&gt;                    &lt;NA&gt;
+30           &lt;NA&gt;             &lt;NA&gt;             &lt;NA&gt;                    &lt;NA&gt;
+31           &lt;NA&gt;             &lt;NA&gt;             &lt;NA&gt;                    &lt;NA&gt;
+32           &lt;NA&gt;             &lt;NA&gt;             &lt;NA&gt;                    &lt;NA&gt;
+   capacity industrial loc_name disused.fhrs.id historic.aeroway hazard
+27     &lt;NA&gt;       &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;             &lt;NA&gt;   &lt;NA&gt;
+28     &lt;NA&gt;       &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;             &lt;NA&gt;   &lt;NA&gt;
+29     &lt;NA&gt;       &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;             &lt;NA&gt;   &lt;NA&gt;
+30     &lt;NA&gt;       &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;             &lt;NA&gt;   &lt;NA&gt;
+31     &lt;NA&gt;       &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;             &lt;NA&gt;   &lt;NA&gt;
+32     &lt;NA&gt;       &lt;NA&gt;     &lt;NA&gt;            &lt;NA&gt;             &lt;NA&gt;   &lt;NA&gt;
+   note.access FIXME source.operator bicycle motor_vehicle community_centre
+27        &lt;NA&gt;  &lt;NA&gt;            &lt;NA&gt;    &lt;NA&gt;          &lt;NA&gt;             &lt;NA&gt;
+28        &lt;NA&gt;  &lt;NA&gt;            &lt;NA&gt;    &lt;NA&gt;          &lt;NA&gt;             &lt;NA&gt;
+29        &lt;NA&gt;  &lt;NA&gt;            &lt;NA&gt;    &lt;NA&gt;          &lt;NA&gt;             &lt;NA&gt;
+30        &lt;NA&gt;  &lt;NA&gt;            &lt;NA&gt;    &lt;NA&gt;          &lt;NA&gt;             &lt;NA&gt;
+31        &lt;NA&gt;  &lt;NA&gt;            &lt;NA&gt;    &lt;NA&gt;          &lt;NA&gt;             &lt;NA&gt;
+32        &lt;NA&gt;  &lt;NA&gt;            &lt;NA&gt;    &lt;NA&gt;          &lt;NA&gt;             &lt;NA&gt;
+   name_1 name_2 name_3 occupier previous_name addr.locality landcover
+27   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;      &lt;NA&gt;
+28   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;      &lt;NA&gt;
+29   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;      &lt;NA&gt;
+30   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;      &lt;NA&gt;
+31   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;      &lt;NA&gt;
+32   &lt;NA&gt;   &lt;NA&gt;   &lt;NA&gt;     &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;      &lt;NA&gt;
+   military.branch name.historic source.area logainm.ref logainm.url name.ga
+27            &lt;NA&gt;          &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;    &lt;NA&gt;
+28            &lt;NA&gt;          &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;    &lt;NA&gt;
+29            &lt;NA&gt;          &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;    &lt;NA&gt;
+30            &lt;NA&gt;          &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;    &lt;NA&gt;
+31            &lt;NA&gt;          &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;    &lt;NA&gt;
+32            &lt;NA&gt;          &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;    &lt;NA&gt;
+   tenant opening_hours                       geometry
+27   &lt;NA&gt;          &lt;NA&gt; POLYGON ((-2.16199 51.20263...
+28   &lt;NA&gt;          &lt;NA&gt; POLYGON ((-2.161941 51.2109...
+29   &lt;NA&gt;          &lt;NA&gt; POLYGON ((-2.051569 51.2348...
+30   &lt;NA&gt;          &lt;NA&gt; POLYGON ((-2.159604 51.2063...
+31   &lt;NA&gt;          &lt;NA&gt; POLYGON ((-2.166669 51.2067...
+32   &lt;NA&gt;          &lt;NA&gt; POLYGON ((-2.158473 51.2051...</code></pre>
+</div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> p202r24, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">colour =</span> <span class="st">"black"</span>, <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>) <span class="sc">+</span> </span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> buildings, <span class="at">fill =</span> <span class="st">"red"</span>, <span class="at">colour =</span> <span class="st">"red"</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> p202r24, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">colour =</span> <span class="st">"black"</span>, <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>) <span class="sc">+</span> </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> buildings, <span class="at">fill =</span> <span class="st">"red"</span>, <span class="at">colour =</span> <span class="st">"red"</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -286,6 +626,28 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p></p><figcaption class="figure-caption">Buildings</figcaption><p></p>
 </figure>
 </div>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(buildings)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 6 features and 5 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: -2.107443 ymin: 52.60725 xmax: -2.106043 ymax: 52.60865
+Geodetic CRS:  WGS 84
+                                    ID DISTNAME BUILDGTHEM CLASSIFICA FEATCODE
+1 B563AA38-2AC7-4171-8D9D-1C74CD5FBADA     &lt;NA&gt;       &lt;NA&gt;       &lt;NA&gt;    15014
+2 7F745932-FBD8-45F2-9DC8-6B5BBEA9CF3A     &lt;NA&gt;       &lt;NA&gt;       &lt;NA&gt;    15014
+3 C97B110A-86ED-413A-913A-8E2F88CD0DEA     &lt;NA&gt;       &lt;NA&gt;       &lt;NA&gt;    15014
+4 E5FD1E99-2DD0-4634-830C-225BABD484F7     &lt;NA&gt;       &lt;NA&gt;       &lt;NA&gt;    15014
+5 4FFC5598-C446-4BA3-BF45-FD39FD3F155F     &lt;NA&gt;       &lt;NA&gt;       &lt;NA&gt;    15014
+6 1CEF1863-D30B-4A26-BAB8-A1B8276F955A     &lt;NA&gt;       &lt;NA&gt;       &lt;NA&gt;    15014
+                        geometry
+1 POLYGON ((-2.10701 52.60848...
+2 POLYGON ((-2.106813 52.6084...
+3 POLYGON ((-2.10618 52.6085,...
+4 POLYGON ((-2.106225 52.6084...
+5 POLYGON ((-2.106179 52.6083...
+6 POLYGON ((-2.107314 52.6080...</code></pre>
 </div>
 </div>
 

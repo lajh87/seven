@@ -56,6 +56,8 @@ ggplot() +
   geom_sf(data = p202r24, fill = NA, colour = "black", inherit.aes = FALSE) + 
   geom_sf(data = boundaries, fill = "red", colour = NA, alpha = 0.2, inherit.aes = FALSE)
 
+head(boundaries)
+
 ```
 
 ```{r}
@@ -63,5 +65,7 @@ ggplot() +
 ggplot() +
   geom_sf(data = p202r24, fill = NA, colour = "black", inherit.aes = FALSE) + 
   geom_sf(data = buildings, fill = "red", colour = "red", alpha = 0.2, inherit.aes = FALSE)
+
+head(buildings)
 
 ```

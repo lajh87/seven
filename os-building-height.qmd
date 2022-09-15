@@ -1,0 +1,92 @@
+---
+title: OS Building Height
+---
+
+```{r}
+library(sf)
+
+api_key <- Sys.getenv("OS_PROJECT_API_KEY")
+
+base <- "https://api.os.uk"
+path <- "/features/v1/wfs"
+
+layer <- "Topography_TopographicArea"
+
+query <- query <- list(
+  service="wfs",
+  request="GetFeature",
+  version = "2.0.0",
+  key=api_key,
+  typeNames = layer,
+   srsName = "EPSG:27700",
+  outputFormat = "GeoJSON"
+  )
+
+httr::GET(base, path = path, query = query)
+
+```
+
+# Filter
+
+```{r}
+# Filter Buildings in a Bounding Box
+xml <- '
+<ogc:Filter>
+  <ogc:And>
+    <ogc:Within>
+      <PropertyName>SHAPE</PropertyName>
+      <gml:Box xmlns:gml="http://www.opengis.net/gml" srsName="EPSG:27700">
+        <gml:coordinates decimal="." cs="," ts=",">
+          436833.50,115334.90,437643.25,115761.50
+        </gml:coordinates>
+      </gml:Box>
+    </ogc:Within>
+    <ogc:PropertyIsEqualTo>
+      <ogc:PropertyName>DescriptiveGroup</ogc:PropertyName>
+      <ogc:Literal>Building</ogc:Literal>
+    </ogc:PropertyIsEqualTo>
+  </ogc:And>
+</ogc:Filter>
+'
+
+# Get Hits
+query <- list(
+  service="wfs",
+  request="GetFeature",
+  version = "2.0.0",
+  key=api_key,
+  typeNames = layer,
+  resultType = "hits",
+  #bbox = "436833.50,115334.90,437643.25,115761.50", # Would take precedence over xml filter (see tech docs)
+  srsName = "EPSG:27700",
+  filter = xml
+)
+
+req <- httr::GET(base, path = path, query = query) # This sometimes times out. Could be more strict with spatial filter.
+req
+hit_attrs <- httr::content(req) |>
+  xml2::xml_attrs()
+
+names(hit_attrs)
+hit_attrs[2]
+
+
+# Get Results
+query <- list(
+  service="wfs",
+  request="GetFeature",
+  version = "2.0.0",
+  key=api_key,
+  typeNames = layer,
+  outputFormat = "GeoJSON",
+#  bbox = "436833.50,115334.90,437643.25,115761.50",
+  srsName = "EPSG:27700",
+  startIndex = 1,
+  filter = xml
+)
+
+req <- httr::GET(base, path = path, query = query)
+sf <- st_read(req, quiet = TRUE)
+head(sf) ## TODO add building attribute filter to query
+plot(sf$geometry)
+```
