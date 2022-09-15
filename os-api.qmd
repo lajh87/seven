@@ -1,0 +1,83 @@
+---
+title: Ordnance Survey API
+---
+
+```{r, warning = FALSE, message = FALSE}
+library(httr)
+library(sf)
+```
+
+# Objective
+
+1. Download buildings from OS 
+2. Match to building height attribute.
+
+# ONS API
+
+```{r}
+api_key <- Sys.getenv("OS_PROJECT_API_KEY")
+
+base <- "https://api.os.uk"
+path <- "/features/v1/wfs"
+query <- list(service="wfs",
+              request="getcapabilities",
+              key=api_key)
+
+req <- httr::GET(base, path = path, query = query)
+req$status_code
+
+xml <- httr::content(req) 
+xml2::xml_children(xml) 
+
+# Output formats
+xml |>
+  xml2::xml_child(3) |>
+  xml2::xml_child(4) |>
+  xml2::xml_child(3) |> 
+  xml2::xml_children() |>
+  xml2::xml_children() |>
+  xml2::xml_text()  
+
+```
+
+
+```{r}
+query <- list(
+  service="wfs",
+  request="DescribeFeatureType",
+  version = "2.0.0",
+  key=api_key
+)
+
+req <- httr::GET(base, path = path, query = query)
+req$status_code
+
+# Features
+httr::content(req) |>
+  xml2::xml_find_all("//xsd:element[@substitutionGroup='gml:AbstractFeature']") |>
+  xml2::xml_attr("name")
+
+# Feature Elements
+httr::content(req) |>
+  xml2::xml_find_all("//xsd:complexType[@name = 'Zoomstack_LocalBuildingsFeatureType']//xsd:element") 
+```
+
+# Get Buildings
+
+```{r}
+query <- list(
+  service="wfs",
+  request="GetFeature",
+  version = "2.0.0",
+  key=api_key,
+  typeNames = "Zoomstack_LocalBuildings",
+  outputFormat = "GeoJSON",
+  srsName = "EPSG:27700"
+)
+
+req <- httr::GET(base, path = path, query = query)
+req$status_code
+sf <- read_sf(req)
+plot(sf$geometry)
+```
+
