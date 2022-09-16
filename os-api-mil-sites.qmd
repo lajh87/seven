@@ -1,0 +1,208 @@
+---
+title: "OS Api Military Sites"
+---
+
+# Create Bounding Box
+
+```{r}
+
+library(sf)
+
+lng1 <- -1.664772
+lat1 <- 51.722137
+lng2 <- -1.530704
+lat2 <- 51.777665
+
+bbox <- st_bbox(c(xmin = lng1, xmax = lng2, ymin = lat1, ymax = lat2), crs = 4326)
+bbox <- bbox |> st_as_sfc()
+
+bbox <- st_transform(bbox, 27700)
+bbox
+
+```
+
+# Extract Topography Data from OS
+
+```{r}
+
+api_key <- Sys.getenv("OS_PROJECT_API_KEY")
+
+base <- "https://api.os.uk"
+path <- "/features/v1/wfs"
+
+layer <- "Topography_TopographicArea"
+
+# Query the hits
+query <- list(
+  service="wfs",
+  request="GetFeature",
+  version = "2.0.0",
+  key=api_key,
+  typeNames = layer,
+  srsName = "EPSG:27700",
+  resultType = "hits",
+  bbox = "423224.8,202654.7,432514.1,208881.5" #!xml filter 
+  )
+
+hits <- httr::GET(base, path = path, query = query) |>
+  httr::content()
+
+hits_r <- hits |>  xml2::xml_attrs() |> dplyr::nth(2) |> as.numeric()
+N <- floor(hits_r/100)
+
+# Query the results
+query$resultType <- "results"
+query$outputFormat = "GeoJSON"
+
+results <- purrr::map_df(1:N, ~{
+  print(.x)
+  query$startIndex <- .x
+  httr::GET(base, path = path, query = query) |>
+  sf::st_read(quiet = TRUE)
+})
+
+results |> 
+  dplyr::as_tibble() |>
+  dplyr::group_by(DescriptiveTerm) |>
+  dplyr::summarise(count = dplyr::n()) |>
+  dplyr::arrange(count)
+
+```
+
+# RAF Station
+
+## Functional Site
+
+```{r}
+layer <- "Sites_FunctionalSite"
+
+# Query the hits
+query <- list(
+  service="wfs",
+  request="GetFeature",
+  version = "2.0.0",
+  key=api_key,
+  typeNames = layer,
+  srsName = "EPSG:27700",
+  resultType = "hits",
+  bbox = "423224.8,202654.7,432514.1,208881.5" #!xml filter 
+  )
+
+hits <- httr::GET(base, path = path, query = query) |>
+  httr::content()
+
+(hits_r <- hits |>  xml2::xml_attrs() |> dplyr::nth(2) |> as.numeric())
+N <- floor(hits_r/100)
+
+# Query the results
+query$resultType <- "results"
+query$outputFormat = "GeoJSON"
+
+results <- purrr::map_df(1:N, ~{
+  print(.x)
+  query$startIndex <- .x
+  httr::GET(base, path = path, query = query) |>
+  sf::st_read(quiet = TRUE)
+})
+
+results
+
+
+  
+
+```
+
+## Boundary Line
+
+```{r}
+layer <- "Topography_BoundaryLine"
+
+# Query the hits
+query <- list(
+  service="wfs",
+  request="GetFeature",
+  version = "2.0.0",
+  key=api_key,
+  typeNames = layer,
+  srsName = "EPSG:27700",
+  resultType = "hits",
+  bbox = "423224.8,202654.7,432514.1,208881.5" #!xml filter 
+  )
+
+hits <- httr::GET(base, path = path, query = query) |>
+  httr::content()
+
+(hits_r <- hits |>  xml2::xml_attrs() |> dplyr::nth(2) |> as.numeric())
+N <- floor(hits_r/100)
+
+# Query the results
+query$resultType <- "results"
+query$outputFormat = "GeoJSON"
+
+results <- httr::GET(base, path = path, query = query) |>
+  sf::st_read(quiet = TRUE)
+
+results |>
+  dplyr::as_tibble() |>
+  dplyr::group_by(DescriptiveTerm) |>
+  dplyr::count(sort = TRUE)
+  dplyr::pull(DistinctiveName1)
+```
+
+# Army Base 
+
+
+```{r}
+
+ymax <- 54.4004
+xmin <- -1.8299
+ymin <- 54.2789
+xmax <- -1.4989
+
+bbox_crds <- c(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)
+bbox <- st_bbox(bbox_crds, crs = 4326)
+bbox <- bbox |> st_as_sfc()
+bbox <- st_transform(bbox, 27700)
+
+bbox_bng <- paste(as.character(attributes(bbox)$bbox), collapse = ",")
+layer <- "Sites_FunctionalSite"
+
+# Query the hits
+query <- list(
+  service="wfs",
+  request="GetFeature",
+  version = "2.0.0",
+  key=api_key,
+  typeNames = layer,
+  srsName = "EPSG:27700",
+  resultType = "hits",
+  bbox = bbox_bng #!xml filter 
+  )
+
+hits <- httr::GET(base, path = path, query = query) |>
+  httr::content()
+
+(hits_r <- hits |>  xml2::xml_attrs() |> dplyr::nth(2) |> as.numeric())
+N <- ceiling(hits_r/100)
+
+# Query the results
+query$resultType <- "results"
+query$outputFormat = "GeoJSON"
+
+results <- httr::GET(base, path = path, query = query) |>
+  sf::st_read(quiet = TRUE)
+
+results |>
+  dplyr::as_tibble() |>
+  dplyr::group_by(SiteFunction) |>
+  dplyr::count(sort = TRUE)
+
+results |> dplyr::pull(DistinctiveName1)
+```
+
+# Navy Base
+
+```{r}
+
+
+```

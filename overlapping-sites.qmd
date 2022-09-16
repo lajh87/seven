@@ -1,5 +1,5 @@
 ---
-title: Overlaping Sites
+title: Cluster Overlaping Sites
 ---
 
 ```{r, warning = FALSE, message = FALSE}
@@ -8,6 +8,8 @@ library(igraph)
 library(leaflet)
 source("R/postgis.R")
 ```
+
+# Connect to Database and Extract Military Sites
 
 ```{r}
 db <- connect_postgres()
@@ -18,11 +20,23 @@ sites <- st_read(db, "mil_boundaries_osm") |>
 
 DBI::dbDisconnect(db)
 
+sites <- sites |> dplyr::filter(name != "WW2 Pillbox")
 
 ```
 
+# Convert to British National Grid and Buffer by 400m
+
+Buffer works better with BNG projection (Meters).
+
 ```{r}
-g <-st_intersects(sites) |>
+sites_bng <- st_transform(sites, 27700) 
+sites_buffer <- st_buffer(sites_bng, 400)
+
+```
+
+
+```{r}
+g <- st_intersects(sites_buffer) |>
   graph_from_adj_list()
 comp <- components(g)
 sites$cluster <- comp$membership
@@ -30,7 +44,6 @@ sites$cluster <- comp$membership
 sites_clustered <- sites |> 
   dplyr::group_by(cluster) |>
   dplyr::summarise(geometry = st_union(geometry)) 
-
 
 ```
 
@@ -58,8 +71,8 @@ sites_clustered <- sites_clustered |>
   dplyr::mutate(csize = comp$csize) |>
   dplyr::select(cluster, csize, primary_name = name, primary_landuse = landuse, primary_military = military, geometry)
 
+sites_clustered <- st_make_valid(sites_clustered)
 sites_clustered$area <- st_area(sites_clustered)
-
 
 ```
 
