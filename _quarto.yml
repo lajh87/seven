@@ -21,6 +21,7 @@ website:
         contents:
           - os-api.qmd
           - os-building-height.qmd
+          - os-api-mil-sites.qmd
       - section: "Post GIS"
         contents:
           - postgis-bbox-query.qmd

@@ -1,5 +1,6 @@
 ---
-title: "OS Api Military Sites"
+title: "Get Mil Sites from OS API"
+editor: visual
 ---
 
 # Create Bounding Box
@@ -48,17 +49,16 @@ hits <- httr::GET(base, path = path, query = query) |>
   httr::content()
 
 hits_r <- hits |>  xml2::xml_attrs() |> dplyr::nth(2) |> as.numeric()
-N <- floor(hits_r/100)
+N <- ceiling(hits_r/100)
 
 # Query the results
 query$resultType <- "results"
 query$outputFormat = "GeoJSON"
 
 results <- purrr::map_df(1:N, ~{
-  print(.x)
   query$startIndex <- .x
   httr::GET(base, path = path, query = query) |>
-  sf::st_read(quiet = TRUE)
+  sf::st_read(quiet = TRUE) |> suppressMessages() |> suppressWarnings()
 })
 
 results |> 
@@ -70,8 +70,6 @@ results |>
 ```
 
 # RAF Station
-
-## Functional Site
 
 ```{r}
 layer <- "Sites_FunctionalSite"
@@ -92,17 +90,18 @@ hits <- httr::GET(base, path = path, query = query) |>
   httr::content()
 
 (hits_r <- hits |>  xml2::xml_attrs() |> dplyr::nth(2) |> as.numeric())
-N <- floor(hits_r/100)
+N <- ceiling(hits_r/100)
 
 # Query the results
 query$resultType <- "results"
 query$outputFormat = "GeoJSON"
 
 results <- purrr::map_df(1:N, ~{
-  print(.x)
   query$startIndex <- .x
   httr::GET(base, path = path, query = query) |>
-  sf::st_read(quiet = TRUE)
+  sf::st_read(quiet = TRUE) |>
+    suppressMessages() |>
+    suppressWarnings()
 })
 
 results
@@ -112,45 +111,7 @@ results
 
 ```
 
-## Boundary Line
-
-```{r}
-layer <- "Topography_BoundaryLine"
-
-# Query the hits
-query <- list(
-  service="wfs",
-  request="GetFeature",
-  version = "2.0.0",
-  key=api_key,
-  typeNames = layer,
-  srsName = "EPSG:27700",
-  resultType = "hits",
-  bbox = "423224.8,202654.7,432514.1,208881.5" #!xml filter 
-  )
-
-hits <- httr::GET(base, path = path, query = query) |>
-  httr::content()
-
-(hits_r <- hits |>  xml2::xml_attrs() |> dplyr::nth(2) |> as.numeric())
-N <- floor(hits_r/100)
-
-# Query the results
-query$resultType <- "results"
-query$outputFormat = "GeoJSON"
-
-results <- httr::GET(base, path = path, query = query) |>
-  sf::st_read(quiet = TRUE)
-
-results |>
-  dplyr::as_tibble() |>
-  dplyr::group_by(DescriptiveTerm) |>
-  dplyr::count(sort = TRUE)
-  dplyr::pull(DistinctiveName1)
-```
-
-# Army Base 
-
+# Army Base
 
 ```{r}
 
@@ -200,9 +161,4 @@ results |>
 results |> dplyr::pull(DistinctiveName1)
 ```
 
-# Navy Base
-
-```{r}
-
-
-```
+# 

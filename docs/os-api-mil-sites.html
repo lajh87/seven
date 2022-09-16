@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>OS Api Military Sites</title>
+<title>Get Mil Sites from OS API</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -132,7 +132,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
     <div class="container-fluid d-flex justify-content-between">
-      <h1 class="quarto-secondary-nav-title">OS Api Military Sites</h1>
+      <h1 class="quarto-secondary-nav-title">Get Mil Sites from OS API</h1>
       <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
         <i class="bi bi-chevron-right"></i>
       </button>
@@ -190,7 +190,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./overlapping-sites.html" class="sidebar-item-text sidebar-link">Overlaping Sites</a>
+  <a href="./overlapping-sites.html" class="sidebar-item-text sidebar-link">Cluster Overlaping Sites</a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -216,6 +216,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./os-building-height.html" class="sidebar-item-text sidebar-link">OS Building Height</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./os-api-mil-sites.html" class="sidebar-item-text sidebar-link active">Get Mil Sites from OS API</a>
   </div>
 </li>
       </ul>
@@ -245,6 +250,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
    
   <ul>
   <li><a href="#create-bounding-box" id="toc-create-bounding-box" class="nav-link active" data-scroll-target="#create-bounding-box">Create Bounding Box</a></li>
+  <li><a href="#extract-topography-data-from-os" id="toc-extract-topography-data-from-os" class="nav-link" data-scroll-target="#extract-topography-data-from-os">Extract Topography Data from OS</a></li>
+  <li><a href="#raf-station" id="toc-raf-station" class="nav-link" data-scroll-target="#raf-station">RAF Station</a></li>
+  <li><a href="#army-base" id="toc-army-base" class="nav-link" data-scroll-target="#army-base">Army Base</a></li>
+  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"></a></li>
   </ul>
 </nav>
     </div>
@@ -253,7 +262,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">OS Api Military Sites</h1>
+<h1 class="title d-none d-lg-block">Get Mil Sites from OS API</h1>
 </div>
 
 
@@ -270,11 +279,336 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="create-bounding-box" class="level1">
 <h1>Create Bounding Box</h1>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>lng1 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">1.664772</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>lat1 <span class="ot">&lt;-</span> <span class="fl">51.722137</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>lng2 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">1.530704</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>lat2 <span class="ot">&lt;-</span> <span class="fl">51.777665</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Linking to GEOS 3.9.1, GDAL 3.4.3, PROJ 7.2.1; sf_use_s2() is TRUE</code></pre>
 </div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>lng1 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">1.664772</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>lat1 <span class="ot">&lt;-</span> <span class="fl">51.722137</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>lng2 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">1.530704</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>lat2 <span class="ot">&lt;-</span> <span class="fl">51.777665</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>bbox <span class="ot">&lt;-</span> <span class="fu">st_bbox</span>(<span class="fu">c</span>(<span class="at">xmin =</span> lng1, <span class="at">xmax =</span> lng2, <span class="at">ymin =</span> lat1, <span class="at">ymax =</span> lat2), <span class="at">crs =</span> <span class="dv">4326</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>bbox <span class="ot">&lt;-</span> bbox <span class="sc">|&gt;</span> <span class="fu">st_as_sfc</span>()</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>bbox <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(bbox, <span class="dv">27700</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>bbox</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Geometry set for 1 feature 
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: 423224.8 ymin: 202654.7 xmax: 432514.1 ymax: 208881.5
+Projected CRS: OSGB 1936 / British National Grid</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>POLYGON ((423253.2 202654.7, 432514.1 202705.7,...</code></pre>
+</div>
+</div>
+</section>
+<section id="extract-topography-data-from-os" class="level1">
+<h1>Extract Topography Data from OS</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>api_key <span class="ot">&lt;-</span> <span class="fu">Sys.getenv</span>(<span class="st">"OS_PROJECT_API_KEY"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>base <span class="ot">&lt;-</span> <span class="st">"https://api.os.uk"</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>path <span class="ot">&lt;-</span> <span class="st">"/features/v1/wfs"</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>layer <span class="ot">&lt;-</span> <span class="st">"Topography_TopographicArea"</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Query the hits</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>query <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">service=</span><span class="st">"wfs"</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">request=</span><span class="st">"GetFeature"</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">version =</span> <span class="st">"2.0.0"</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">key=</span>api_key,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">typeNames =</span> layer,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">srsName =</span> <span class="st">"EPSG:27700"</span>,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">resultType =</span> <span class="st">"hits"</span>,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">bbox =</span> <span class="st">"423224.8,202654.7,432514.1,208881.5"</span> <span class="co">#!xml filter </span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>hits <span class="ot">&lt;-</span> httr<span class="sc">::</span><span class="fu">GET</span>(base, <span class="at">path =</span> path, <span class="at">query =</span> query) <span class="sc">|&gt;</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  httr<span class="sc">::</span><span class="fu">content</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>No encoding supplied: defaulting to UTF-8.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>hits_r <span class="ot">&lt;-</span> hits <span class="sc">|&gt;</span>  xml2<span class="sc">::</span><span class="fu">xml_attrs</span>() <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">nth</span>(<span class="dv">2</span>) <span class="sc">|&gt;</span> <span class="fu">as.numeric</span>()</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="fu">ceiling</span>(hits_r<span class="sc">/</span><span class="dv">100</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Query the results</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>query<span class="sc">$</span>resultType <span class="ot">&lt;-</span> <span class="st">"results"</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>query<span class="sc">$</span>outputFormat <span class="ot">=</span> <span class="st">"GeoJSON"</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_df</span>(<span class="dv">1</span><span class="sc">:</span>N, <span class="sc">~</span>{</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  query<span class="sc">$</span>startIndex <span class="ot">&lt;-</span> .x</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  httr<span class="sc">::</span><span class="fu">GET</span>(base, <span class="at">path =</span> path, <span class="at">query =</span> query) <span class="sc">|&gt;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_read</span>(<span class="at">quiet =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">suppressMessages</span>() <span class="sc">|&gt;</span> <span class="fu">suppressWarnings</span>()</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>results <span class="sc">|&gt;</span> </span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(DescriptiveTerm) <span class="sc">|&gt;</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">count =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(count)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 15 × 2
+   DescriptiveTerm                            count
+   &lt;chr&gt;                                      &lt;int&gt;
+ 1 Coniferous Trees,Nonconiferous Trees,Scrub   472
+ 2 Nonconiferous Trees                          472
+ 3 Nonconiferous Trees (Scattered)              472
+ 4 Pylon                                        472
+ 5 Rough Grassland                              472
+ 6 Spring                                       472
+ 7 Nonconiferous Trees,Scrub                    944
+ 8 Coniferous Trees,Nonconiferous Trees        1416
+ 9 Drain                                       1416
+10 Nonconiferous Trees,Coniferous Trees        1416
+11 Watercourse                                 2360
+12 Static Water                                3776
+13 Multi Surface                               8024
+14 Agricultural Land                           9912
+15 null                                       15104</code></pre>
+</div>
+</div>
+</section>
+<section id="raf-station" class="level1">
+<h1>RAF Station</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>layer <span class="ot">&lt;-</span> <span class="st">"Sites_FunctionalSite"</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Query the hits</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>query <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">service=</span><span class="st">"wfs"</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">request=</span><span class="st">"GetFeature"</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">version =</span> <span class="st">"2.0.0"</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">key=</span>api_key,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">typeNames =</span> layer,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">srsName =</span> <span class="st">"EPSG:27700"</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">resultType =</span> <span class="st">"hits"</span>,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">bbox =</span> <span class="st">"423224.8,202654.7,432514.1,208881.5"</span> <span class="co">#!xml filter </span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>hits <span class="ot">&lt;-</span> httr<span class="sc">::</span><span class="fu">GET</span>(base, <span class="at">path =</span> path, <span class="at">query =</span> query) <span class="sc">|&gt;</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  httr<span class="sc">::</span><span class="fu">content</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>No encoding supplied: defaulting to UTF-8.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(hits_r <span class="ot">&lt;-</span> hits <span class="sc">|&gt;</span>  xml2<span class="sc">::</span><span class="fu">xml_attrs</span>() <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">nth</span>(<span class="dv">2</span>) <span class="sc">|&gt;</span> <span class="fu">as.numeric</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 14</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="fu">ceiling</span>(hits_r<span class="sc">/</span><span class="dv">100</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Query the results</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>query<span class="sc">$</span>resultType <span class="ot">&lt;-</span> <span class="st">"results"</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>query<span class="sc">$</span>outputFormat <span class="ot">=</span> <span class="st">"GeoJSON"</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_df</span>(<span class="dv">1</span><span class="sc">:</span>N, <span class="sc">~</span>{</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  query<span class="sc">$</span>startIndex <span class="ot">&lt;-</span> .x</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  httr<span class="sc">::</span><span class="fu">GET</span>(base, <span class="at">path =</span> path, <span class="at">query =</span> query) <span class="sc">|&gt;</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_read</span>(<span class="at">quiet =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">suppressMessages</span>() <span class="sc">|&gt;</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">suppressWarnings</span>()</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>results</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 14 features and 22 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: 424263.7 ymin: 203680.6 xmax: 431664.6 ymax: 208059.8
+Geodetic CRS:  WGS 84
+First 10 features:
+   OBJECTID                 TOID Version VersionDate ReasonForChange
+1       266 osgb4000000073956096      10    4/3/2020        Modified
+2      5521 osgb4000000073548240       6    4/5/2017        Modified
+3     23598 osgb5000005258517356       1   1/17/2020             New
+4     24810 osgb5000005258992139       2    2/4/2020      Attributes
+5     31822 osgb4000000073320982       6   12/6/2019        Modified
+6     31823 osgb4000000073320983       6  12/10/2019        Modified
+7     31824 osgb4000000073320985       5   8/14/2019      Attributes
+8     31825 osgb4000000073320986       9   6/17/2021        Modified
+9     31826 osgb4000000073320987       6  12/10/2019        Modified
+10    31827 osgb4000000073320988       7   12/5/2019        Modified
+   FunctionStatus         FunctionTheme             SiteFunction SitePerimeter
+1     Operational         Air Transport                 Airfield      14757.06
+2     Operational Utility or Industrial   Electricity Production       4510.09
+3     Operational Utility or Industrial Electricity Distribution        207.14
+4     Operational Utility or Industrial Electricity Distribution        202.59
+5     Operational             Education        Primary Education        259.25
+6     Operational             Education        Primary Education        777.88
+7     Operational             Education        Primary Education        602.97
+8     Operational             Education        Primary Education        732.52
+9     Operational             Education      Secondary Education       1289.19
+10    Operational             Education        Primary Education        944.19
+     SiteArea                                              DistinctiveName1
+1  4450624.33                                              RAF Brize Norton
+2   458770.37                                        Kencot Hill Solar Farm
+3     2453.38                                                          null
+4     2523.55                                                          null
+5     2072.62 St Peter's Church of England (Voluntary Aided) Infants School
+6    22419.37                                        Gateway Primary School
+7    18342.73       St John the Evangelist Church of England Primary School
+8    20937.17                                      Carterton Primary School
+9    77853.34                                   Carterton Community College
+10   17741.61                                Edith Moorhouse Primary School
+   DistinctiveName2 DistinctiveName3 DistinctiveName4 PrimaryAddressBaseUPRN
+1              null             null             null            10003997289
+2              null             null             null            10025543166
+3              null             null             null            10025235076
+4              null             null             null            10024986862
+5              null             null             null           100121315141
+6              null             null             null           100121315954
+7              null             null             null            10003995314
+8              null             null             null           100121315952
+9              null             null             null           100121315113
+10             null             null             null           100121315689
+   Stakeholder1 Stakeholder2 Stakeholder1Role Stakeholder2Role ExtentDefinition
+1          null         null             null             null    Fully Defined
+2          null         null             null             null    Fully Defined
+3          null         null             null             null    Fully Defined
+4          null         null             null             null    Fully Defined
+5          null         null             null             null    Fully Defined
+6          null         null             null             null    Fully Defined
+7          null         null             null             null    Fully Defined
+8          null         null             null             null    Fully Defined
+9          null         null             null             null    Fully Defined
+10         null         null             null             null    Fully Defined
+   SHAPE_Length  SHAPE_Area                       geometry
+1    14757.0597 4450625.256 POLYGON ((429667.7 207380.7...
+2     4510.0910  458769.514 POLYGON ((424936.8 207485.3...
+3      207.1369    2453.375 POLYGON ((428313.9 207826.3...
+4      202.5919    2523.570 POLYGON ((428390.6 203788.2...
+5      259.2543    2072.765 POLYGON ((427263.7 204561.9...
+6      777.8885   22419.263 POLYGON ((428523.8 206608.7...
+7      602.9658   18342.746 POLYGON ((428757.6 208057.1...
+8      732.5161   20937.094 POLYGON ((428192.7 207197.2...
+9     1289.1882   77853.312 POLYGON ((427672.7 207592.2...
+10     944.2038   17741.695 POLYGON ((427644.3 206775.1...</code></pre>
+</div>
+</div>
+</section>
+<section id="army-base" class="level1">
+<h1>Army Base</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>ymax <span class="ot">&lt;-</span> <span class="fl">54.4004</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>xmin <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">1.8299</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>ymin <span class="ot">&lt;-</span> <span class="fl">54.2789</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>xmax <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">1.4989</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>bbox_crds <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">xmin =</span> xmin, <span class="at">xmax =</span> xmax, <span class="at">ymin =</span> ymin, <span class="at">ymax =</span> ymax)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>bbox <span class="ot">&lt;-</span> <span class="fu">st_bbox</span>(bbox_crds, <span class="at">crs =</span> <span class="dv">4326</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>bbox <span class="ot">&lt;-</span> bbox <span class="sc">|&gt;</span> <span class="fu">st_as_sfc</span>()</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>bbox <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(bbox, <span class="dv">27700</span>)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>bbox_bng <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="fu">as.character</span>(<span class="fu">attributes</span>(bbox)<span class="sc">$</span>bbox), <span class="at">collapse =</span> <span class="st">","</span>)</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>layer <span class="ot">&lt;-</span> <span class="st">"Sites_FunctionalSite"</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Query the hits</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>query <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">service=</span><span class="st">"wfs"</span>,</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">request=</span><span class="st">"GetFeature"</span>,</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">version =</span> <span class="st">"2.0.0"</span>,</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">key=</span>api_key,</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">typeNames =</span> layer,</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">srsName =</span> <span class="st">"EPSG:27700"</span>,</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">resultType =</span> <span class="st">"hits"</span>,</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">bbox =</span> bbox_bng <span class="co">#!xml filter </span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>hits <span class="ot">&lt;-</span> httr<span class="sc">::</span><span class="fu">GET</span>(base, <span class="at">path =</span> path, <span class="at">query =</span> query) <span class="sc">|&gt;</span></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>  httr<span class="sc">::</span><span class="fu">content</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>No encoding supplied: defaulting to UTF-8.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>(hits_r <span class="ot">&lt;-</span> hits <span class="sc">|&gt;</span>  xml2<span class="sc">::</span><span class="fu">xml_attrs</span>() <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">nth</span>(<span class="dv">2</span>) <span class="sc">|&gt;</span> <span class="fu">as.numeric</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 43</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="fu">ceiling</span>(hits_r<span class="sc">/</span><span class="dv">100</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Query the results</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>query<span class="sc">$</span>resultType <span class="ot">&lt;-</span> <span class="st">"results"</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>query<span class="sc">$</span>outputFormat <span class="ot">=</span> <span class="st">"GeoJSON"</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> httr<span class="sc">::</span><span class="fu">GET</span>(base, <span class="at">path =</span> path, <span class="at">query =</span> query) <span class="sc">|&gt;</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_read</span>(<span class="at">quiet =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>No encoding supplied: defaulting to UTF-8.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>results <span class="sc">|&gt;</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(SiteFunction) <span class="sc">|&gt;</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">count</span>(<span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 12 × 2
+# Groups:   SiteFunction [12]
+   SiteFunction                              n
+   &lt;chr&gt;                                 &lt;int&gt;
+ 1 Primary Education                        22
+ 2 Railway Station                           5
+ 3 Medical Care Accommodation                3
+ 4 Electricity Distribution                  2
+ 5 Gas Distribution or Storage               2
+ 6 Road User Services                        2
+ 7 Secondary Education                       2
+ 8 Airfield                                  1
+ 9 Electricity Production                    1
+10 Further Education,Secondary Education     1
+11 Non State Primary Education               1
+12 Special Needs Education                   1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>results <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(DistinctiveName1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "RAF Leeming"                                                     
+ [2] "Ainderby Steeple Church of England Primary School"               
+ [3] "Bedale High School"                                              
+ [4] "Bedale Church of England Primary School"                         
+ [5] "Brompton-on-Swale Church of England Primary School"              
+ [6] "Michael Syddall Church of England Voluntary Aided Primary School"
+ [7] "Bolton-on-Swale St Mary's Church of England Primary School"      
+ [8] "Hackforth and Hornby Church of England Primary School"           
+ [9] "Mowbray School"                                                  
+[10] "Crakehall Church of England Primary School"                      
+[11] "Le Cateau Community Primary School"                              
+[12] "Aysgarth School"                                                 
+[13] "Hunton and Arrathorne Community Primary School"                  
+[14] "Wavell Community Infant and Nursery School"                      
+[15] "Carnagill Community Primary School"                              
+[16] "Risedale Sports and Community College"                           
+[17] "Hipswell Church of England Primary School"                       
+[18] "Colburn Community Primary School"                                
+[19] "Spennithorne Church of England Primary School"                   
+[20] "The Wensleydale School"                                          
+[21] "Leyburn Community Primary School"                                
+[22] "Middleham Church of England (Aided) School"                      
+[23] "Kirkby Fleetham Church of England Primary School"                
+[24] "Leeming and Londonderry Community Primary School"                
+[25] "null"                                                            
+[26] "Leeming RAF Community Primary School"                            
+[27] "Cambrai Primary School"                                          
+[28] "Maple Lodge"                                                     
+[29] "Rosedale Retirement Nursing Home"                                
+[30] "Bedale"                                                          
+[31] "Finghall Lane"                                                   
+[32] "Leyburn"                                                         
+[33] "Leeming Bar Services"                                            
+[34] "Coneygarth Services"                                             
+[35] "Leeming Garth Manor"                                             
+[36] "Aiskew Leeming Bar Church of England Primary School"             
+[37] "null"                                                            
+[38] "null"                                                            
+[39] "null"                                                            
+[40] "Scruton"                                                         
+[41] "Leeming Bar"                                                     
+[42] "null"                                                            
+[43] "Wavell Community Junior School"                                  </code></pre>
+</div>
+</div>
+</section>
+<section id="section" class="level1">
+<h1></h1>
 
 
 </section>
