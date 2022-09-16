@@ -25,8 +25,4 @@ army_inst_geo <- army_installations |>
   mutate_geocode(location = search, output = "latlona")
 
   
-army_inst_geo |>
-  dplyr::select(X1, X4, X3, lat, lon, address) |>
-  View()
-
-"Alexander Barracks, Woking GU24 0QQ"
+write.csv(army_inst_geo, "data/army-installations.csv", row.names = FALSE)
