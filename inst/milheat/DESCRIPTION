@@ -1,0 +1,7 @@
+Title: Land Surface Temperature of Military Sites in UK
+License: MIT
+DisplayMode: Normal
+Author: Luke Heley (lajh87@me.com)
+AuthorUrl: http://lajh87.github.io
+Type: Shiny
+Tags: leaflet selectize datatables absolutepanel
