@@ -43,5 +43,8 @@
   },
   "military-sites-from-osm.qmd": {
     "military-sites-from-osm.html": "339c37b9"
+  },
+  "geocode-mil-sites-from-wiki.qmd": {
+    "geocode-mil-sites-from-wiki.html": "50aea2a1"
   }
 }

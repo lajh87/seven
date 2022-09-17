@@ -1,0 +1,65 @@
+---
+title: "Tidy and Cluster OSM Military Sites"
+editor: visual
+---
+
+# Setup
+
+```{r}
+library(sf)
+library(igraph)
+source("R/postgis.R")
+```
+
+# Load Data
+
+```{r}
+db <- connect_postgres()
+DBI::dbListTables(db)
+mil_sites_osm <- st_read(db, "military_sites")
+loc_lon_lat <- db |> dplyr::tbl("mil_sites_geo") |> dplyr::collect()
+DBI::dbDisconnect(db)
+```
+
+# Cluster Military Sites
+
+```{r}
+# Filter Area > 100m
+summary(mil_sites_osm$area)
+mil_sites_osm <- mil_sites_osm |> 
+  dplyr::filter(area>=100) |>
+  dplyr::filter(!grepl("^WW2", name))
+
+# Cluster Sites that are within 400m of each other
+clusters <- mil_sites_osm |> 
+  st_transform(27700) |>
+  st_buffer(400) |>
+  st_intersects() |>
+  graph_from_adj_list() |>
+  components()
+
+mil_sites_osm$cluster <- clusters$membership
+
+sites_clustered <- mil_sites_osm |> 
+  dplyr::group_by(cluster) |>
+  dplyr::summarise(geometry = st_union(geometry)) 
+
+sites_clustered$label <- mil_sites_osm |>
+  dplyr::as_tibble() |>
+  dplyr::group_by(cluster) |>
+  dplyr::filter(area == max(area)) |>
+  dplyr::select(cluster, name) |>
+  dplyr::distinct(cluster, .keep_all = TRUE) |>
+  dplyr::pull(name)
+
+sites_clustered
+```
+
+# Upload to PostGIS
+
+```{r}
+
+db <- connect_postgres()
+st_write(sites_clustered, dsn = db, layer = "osm_mil_sites_clustered")
+DBI::dbDisconnect(db)
+```

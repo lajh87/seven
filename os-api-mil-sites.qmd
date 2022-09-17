@@ -312,8 +312,5 @@ query$outputFormat = "GeoJSON"
 results <- httr::GET(base, path = path, query = query) |>
   sf::st_read(quiet = TRUE)
 
-results |>
-  dplyr::as_tibble() |>
-  dplyr::group_by(Type) |>
-  dplyr::count(sort = TRUE)
+
 ```

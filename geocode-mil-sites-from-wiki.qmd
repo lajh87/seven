@@ -1,0 +1,201 @@
+---
+title: "Geocode Military Sites from Wikipedia"
+editor: visual
+---
+
+```{r}
+library(ggmap)
+source("R/postgis.R")
+```
+
+Army installations and RAF stations are provided in a table on wikipedia. Royal Navy establishments are provided as a list. The approach taken is to scrape the tables and list.
+
+# Army
+
+```{r, eval = FALSE}
+url <- "https://en.wikipedia.org/wiki/List_of_British_Army_installations"
+req <- httr::GET(url)
+req$status_code
+army_installations <- httr::content(req) |>
+  xml2::xml_find_all('//*[@id="mw-content-text"]/div[1]/table[21]//tr//td') |>
+  xml2::xml_text() |>
+  matrix(ncol = 6, byrow = TRUE) |>
+  dplyr::as_tibble() |>
+  rlang::set_names(c("name", "garrison", "country", "county", "opened", "notes"))
+army_installations
+```
+
+# RAF
+
+```{r, eval = FALSE}
+url <- "https://en.wikipedia.org/wiki/List_of_Royal_Air_Force_stations"
+xpath <- '//*[@id="mw-content-text"]/div[1]/table[1]//tr/td'
+labs <- c("name", "country", "county", "units and purpose")
+n <- length(labs)
+
+req <- httr::GET(url)
+req$status_code
+
+raf_stations <- httr::content(req) |>
+  xml2::xml_find_all(xpath) |>
+  xml2::xml_text() |>
+  matrix(ncol = n, byrow = TRUE) |>
+  dplyr::as_tibble() |>
+  rlang::set_names(labs) 
+
+(raf_stations <- purrr::map(raf_stations, ~stringr::str_remove(.x, "\n")) |>
+  dplyr::as_tibble())
+
+mob <- c(
+  "RAF Coningsby","RAF Marham", "RAF Lossiemouth", "RAF Waddington", 
+  "RAF Brize Norton", "RAF Benson", "RAF Odiham"
+  )
+raf_stations$mob <- raf_stations$name %in% mob
+raf_stations
+```
+
+# Royal Navy
+
+Royal navy sites are a list.
+
+```{r, eval = FALSE}
+# Naval Bases
+naval_bases <- list(
+  c("HMS Drake", "HMNB Devonport, Devonport, Devon"),
+  c("HMS Nelson" ,"HMNB Portsmouth, Portsmouth"),
+  c("HMS Neptune", "HMNB Clyde, Faslane, Dunbartonshire")
+)
+
+# Air Stations
+air_stations <- list(
+  c("HMS Seahawk", "RNAS Culdrose, Cornwall"),
+  c("HMS Heron", "RNAS Yeovilton, Somerset"),
+  c("HMS Gannet", "South Ayrshire")
+  )
+
+# Training Establishments
+training_estab <- list(
+  c("HMS Collingwood", "Fareham, Hampshire"),
+  c("HMS Dartmouth", "Britannia Royal Naval College, Dartmouth, Devon"),
+  c("HMS Excellent", "Whale Island, Portsmouth"),
+  c("HMS Raleigh", "Torpoint, Cornwall"),
+  c("HMS Sultan", "Gosport, Hampshire"),
+  c("HMS Temeraire", "Portsmouth")
+)
+
+# Other
+other <- list(
+  c("HMS Caledonia", "Rosyth Dockyard, Rosyth, Fife"),
+  c("HMS Saker", "United States"),
+  c("Institute of Naval Medicine", "Alverstoke, Hampshire"),
+  c("Northwood Headquarters", "Northwood, Middlesex, England")
+)
+
+# Defence Munition Centres
+dmc <- list(
+  c("DM Beith", "Beith, Ayrshire"),
+  c("RNAD Coulport", "Coulport,  Argyll and Bute"),
+  c("DM Crombie", "Crombie, Firth of Forth"),
+  c("DM Gosport", "Portsmouth Harbour, Hampshire")
+  )
+
+# Testing
+testeval <- list(c("HMS Vulcan", "Dounreay, Thurso, Caithness"))
+
+# Royal Marines
+rm <- list(
+  c("Commando Training Centre Royal Marines", "Lympstone, Devon"),
+  c("Stonehouse Barracks", "Plymouth, Devon"),
+  c("RM Poole", "Hamworthy Barracks, Poole, Dorset"),
+  c("RM Condor", "Arbroath, Angus"),
+  c("RM Tamar", "HMNB Devonport"),
+  c("Norton Manor Camp", "Taunton, Somerset"),
+  c("Bickleigh Barracks", "Plymouth, Devon"),
+  c("RM Chivenor", "Braunton, Devon"),
+  c("RM Instow", "Instow, Devon")
+  )
+
+
+naval_establishments <- 
+  list(naval_bases, air_stations, training_estab, other, dmc, testeval, rm)
+
+type <- c("Naval Base", "Air Station", "Training Establishment", "Other", "Defence Munitions", "Testing", "Royal Marines")
+
+naval_establishments <- naval_establishments |>
+  purrr::map(~unlist(.x) |> matrix(ncol = 2, byrow = TRUE) |>
+               as.data.frame() |>
+               rlang::set_names(c("name", "location")) |>
+               tibble::as_tibble())
+
+names(naval_establishments) <- type
+naval_df <- purrr::imap_dfr(naval_establishments, ~dplyr::tibble(type =  .y, .x))
+
+```
+
+# Geocode Locations
+
+```{r, eval = FALSE}
+navy <- naval_df |>
+  dplyr::mutate(service = "RN/RM") |>
+  dplyr::mutate(location = paste(name, location, sep = ", ")) |>
+  dplyr::select(service, type, name, location)
+
+army <- army_installations |> 
+  dplyr::mutate(service = "Army") |>
+  dplyr::mutate(type = NA) |>
+  dplyr::mutate(location = ifelse(
+    garrison == "", 
+    paste(name, county, country, sep = ", "),
+    paste(name, garrison, county, country, sep = ", ")
+  )) |>
+  dplyr::select(service, type, name, location)
+
+raf <- raf_stations |>
+  dplyr::mutate(service = "RAF") |>
+  dplyr::mutate(type = ifelse(mob, "Main Operating Base", "Other")) |>
+  dplyr::mutate(location = paste(name, county, country, sep = ", ")) |>
+  dplyr::select(service, type, name, location)
+
+sites <- dplyr::bind_rows(navy, army, raf)
+
+sites_geo <- sites |>
+ ggmap::mutate_geocode(location, output = "latlona")
+
+sites_geo
+
+# vulcan
+# aliwal
+# brompton
+# buckley
+# gale
+# goojerat
+# jellabad 
+# lucknow
+# normandy
+# unijack
+# wing
+# benbecula
+# little rissington
+# raf wittering
+
+```
+
+# Upload to PostGIS
+
+```{r, eval = FALSE}
+db <- connect_postgres()
+DBI::dbWriteTable(db, "mil_sites_geo", sites_geo, row.names = FALSE, overwrite = TRUE)
+DBI::dbDisconnect(db)
+
+```
+
+# Check Data
+
+```{r}
+db <- connect_postgres()
+(mil_sites_geo <- db |>
+  dplyr::tbl("mil_sites_geo") |>
+  dplyr::collect())
+
+DBI::dbDisconnect(db)
+```
