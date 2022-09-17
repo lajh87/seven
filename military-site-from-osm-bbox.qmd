@@ -1,0 +1,54 @@
+---
+title: "Download Specific Bounding Box from OSM"
+editor: visual
+---
+
+# Locate Bounding Box
+
+```{r}
+geocode <- tmaptools::geocode_OSM("HMS Nelson")
+tbl <- dplyr::tibble(
+  query = geocode$query, 
+  x= geocode$coords[1], 
+  y = geocode$coords[2]
+  ) 
+
+spdf <- sf::st_as_sf(tbl, coords = c("x", "y"), crs = 4326)
+spdf |>
+  sf::st_transform(27700) |>
+  sf::st_buffer(2000) |>
+  sf::st_transform(4326) |>
+  leaflet::leaflet() |> 
+  leaflet::addTiles() |>
+  leaflet::addPolygons()
+  
+
+```
+
+# Download Data
+
+```{r}
+bbox <- spdf |>
+  sf::st_transform(27700) |>
+  sf::st_buffer(2000) |>
+  sf::st_transform(4326) |>
+  sf::st_bbox() |>
+  as.numeric()
+
+landuse_military <- osmdata::opq(bbox = bbox) |>  
+  osmdata::add_osm_feature(key = "landuse", value = "military") |>
+  osmdata::osmdata_sf()
+
+landuse_military$osm_multipolygons |>
+  sf::st_transform(4326) |>
+
+  leaflet::leaflet() |>
+  leaflet::addTiles() |>
+  leaflet::addPolygons() 
+
+landuse_military$osm_polygons |>
+  leaflet::leaflet() |>
+  leaflet::addTiles() |>
+  leaflet::addPolygons(label = ~name) 
+
+```

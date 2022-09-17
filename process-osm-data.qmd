@@ -1,0 +1,113 @@
+---
+title: "Process OSM Data"
+editor: visual  
+---
+
+# Fetch Data
+
+```{r}
+library(sf)
+library(igraph)
+library(leaflet)
+source("R/postgis.R")
+```
+
+```{r}
+db <- connect_postgres()
+DBI::dbListTables(db)
+landuse_military <- st_read(db, "landuse_military_osm")
+military <- st_read(db, "military_osm")
+
+```
+
+# Tidy Data
+
+Extract polygons, make sure they are WGS84 (EPSG:4326) projection, select id and name, join military and landuse data, filter distinct.
+
+```{r}
+landuse_military_polygons <- 
+  st_collection_extract(landuse_military, c("POLYGON")) |>
+  st_transform(4326) |>
+  dplyr::select(osm_id, name)
+
+military_polygons  <- military |>
+  st_collection_extract(c("POLYGON")) |>
+  st_transform(4326) |>
+  dplyr::select(osm_id, name)
+
+military_sites <- dplyr::bind_rows(landuse_military_polygons, military_polygons) |> dplyr::distinct() 
+
+military_sites |>
+  leaflet::leaflet() |>
+  leaflet::addTiles() |>
+  leaflet::addPolygons(popup = ~name, label = ~name)
+
+```
+
+# Union Intersecting Polygons
+
+Convert to British National Grid (BNG), Buffer by 1m, determine intersecting polygons
+
+```{r}
+clusters <- military_sites |>
+  st_transform(27700) |>
+  st_buffer(1) |>
+  st_intersects() |>
+  graph_from_adj_list() |>
+  components()
+
+military_sites$cluster <- clusters$membership
+
+```
+
+Create labels based on largest area that is not NA
+
+```{r}
+
+military_sites <- military_sites |>
+  st_transform(27700) |>
+  dplyr::mutate(area = st_area(geometry)) |>
+  st_transform(4326)
+
+cluster_label <- military_sites |>
+  dplyr::group_by(cluster) |>
+  dplyr::filter(!is.na(name)) |>
+  dplyr::filter(area == max(area)) |>
+  dplyr::as_tibble() |>
+  dplyr::select(cluster, name) |>
+  dplyr::distinct(cluster, .keep_all = TRUE)
+
+```
+
+Create union of shapes in clusters and join labels
+
+```{r}
+
+military_site_clusters <- military_sites |>
+  dplyr::group_by(cluster) |>
+  dplyr::summarise(geometry = st_union(geometry)) |>
+  dplyr::left_join(cluster_label, by = "cluster") |>
+  dplyr::select(cluster, name, geometry)
+
+```
+
+# Upload to PostGIS
+
+```{r}
+db <- connect_postgres()
+st_write(military_site_clusters, db, "military_site_clusters")
+DBI::dbDisconnect(db)
+```
+
+# Visualise
+
+```{r}
+db <- connect_postgres()
+military_site_clusters <- st_read(db, "military_site_clusters")
+DBI::dbDisconnect(db)
+leaflet(military_site_clusters) |>
+  addTiles() |>
+  addPolygons(popup = ~name, label = ~name)
+```
+
+# 

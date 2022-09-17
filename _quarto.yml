@@ -13,7 +13,8 @@ website:
       - section: "Acquire Data"
         contents:
           - military-sites-from-osm.qmd
-          - tidy-cluster-osm-sites.qmd
+          - military-site-from-osm-bbox.qmd
+          - process-osm-data.qmd
           - geocode-mil-sites-from-wiki.qmd
           - os-api.qmd
           - os-building-height.qmd
@@ -24,7 +25,6 @@ website:
           - calculating-lst-and-nvdi.qmd
           - mask-clouds.qmd
           - lst-by-building.qmd
-
           - site-lst-ratio.qmd
 
 format:

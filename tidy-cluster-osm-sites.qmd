@@ -44,15 +44,20 @@ sites_clustered <- mil_sites_osm |>
   dplyr::group_by(cluster) |>
   dplyr::summarise(geometry = st_union(geometry)) 
 
-sites_clustered$label <- mil_sites_osm |>
+labels <- mil_sites_osm |>
   dplyr::as_tibble() |>
   dplyr::group_by(cluster) |>
   dplyr::filter(area == max(area)) |>
   dplyr::select(cluster, name) |>
-  dplyr::distinct(cluster, .keep_all = TRUE) |>
-  dplyr::pull(name)
+  dplyr::arrange(cluster) |>
+  dplyr::distinct(cluster, .keep_all = TRUE) 
 
-sites_clustered
+
+sites_clustered <- sites_clustered  |>
+  dplyr::left_join(labels, by = "cluster")
+
+sites_clustered <- sites_clustered |>
+  dplyr::select(cluster, name, geometry)
 ```
 
 # Upload to PostGIS

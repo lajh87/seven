@@ -3,11 +3,24 @@ title: "Get Mil Sites from OS API"
 editor: visual
 ---
 
-# Create Bounding Box
 
 ```{r}
-
 library(sf)
+library(leaflet)
+
+api_key <- Sys.getenv("OS_PROJECT_API_KEY")
+base <- "https://api.os.uk"
+path <- "/features/v1/wfs"
+
+```
+
+
+# RAF Station
+
+## Bounding Box
+
+
+```{r}
 
 lng1 <- -1.664772
 lat1 <- 51.722137
@@ -17,20 +30,20 @@ lat2 <- 51.777665
 bbox <- st_bbox(c(xmin = lng1, xmax = lng2, ymin = lat1, ymax = lat2), crs = 4326)
 bbox <- bbox |> st_as_sfc()
 
-bbox <- st_transform(bbox, 27700)
-bbox
+leaflet(bbox) |>
+  addTiles() |>
+  addPolygons()
+
+bbox_bng <- st_transform(bbox, 27700)  |>
+  st_bbox() |>
+  as.numeric() |>
+  paste(collapse = ",")
 
 ```
 
-# Extract Topography Data from OS
+## Topographic Area
 
-```{r}
-
-api_key <- Sys.getenv("OS_PROJECT_API_KEY")
-
-base <- "https://api.os.uk"
-path <- "/features/v1/wfs"
-
+```{r, eval = FALSE}
 layer <- "Topography_TopographicArea"
 
 # Query the hits
@@ -42,34 +55,59 @@ query <- list(
   typeNames = layer,
   srsName = "EPSG:27700",
   resultType = "hits",
-  bbox = "423224.8,202654.7,432514.1,208881.5" #!xml filter 
+  startIndex = 1,
+  bbox = bbox_bng #!xml filter 
   )
 
 hits <- httr::GET(base, path = path, query = query) |>
   httr::content()
 
-hits_r <- hits |>  xml2::xml_attrs() |> dplyr::nth(2) |> as.numeric()
+hits_r <- hits |>  
+  xml2::xml_attrs() |> 
+  dplyr::nth(2) |> 
+  as.numeric()
+
 N <- ceiling(hits_r/100)
 
 # Query the results
 query$resultType <- "results"
 query$outputFormat = "GeoJSON"
+query$count <- 100 # needed for paging!
 
-results <- purrr::map_df(1:N, ~{
-  query$startIndex <- .x
+results <- purrr::map(1:N, ~{
+  query$startIndex = (.x-1)*100
   httr::GET(base, path = path, query = query) |>
-  sf::st_read(quiet = TRUE) |> suppressMessages() |> suppressWarnings()
+    sf::st_read(quiet = TRUE) |> 
+    suppressMessages() |> 
+    suppressWarnings()
 })
 
-results |> 
+results2 <- purrr::map(results, ~{
+  .x$BHATopoAreaVersion <- as.numeric(.x$BHATopoAreaVersion)
+  .x$AbsHMin <- as.numeric(.x$AbsHMin) 
+  .x$AbsH2 <- as.numeric(.x$AbsH2) 
+  .x$AbsHMax <- as.numeric(.x$AbsHMax) 
+  .x$RelH2 <- as.numeric(.x$RelH2)
+  .x$RelHMax <- as.numeric(.x$RelHMax) 
+  .x$BHAConf <- as.numeric(.x$BHAConf)
+  .x
+})
+
+results2 <- results2 |> 
+  dplyr::bind_rows()
+
+results2 |>
   dplyr::as_tibble() |>
-  dplyr::group_by(DescriptiveTerm) |>
-  dplyr::summarise(count = dplyr::n()) |>
-  dplyr::arrange(count)
+  dplyr::group_by(Theme, DescriptiveGroup, DescriptiveTerm) |>
+  dplyr::count(sort = TRUE)
+
+st_crs(results2) <- 27700
+
 
 ```
 
-# RAF Station
+
+## Functional Site
 
 ```{r}
 layer <- "Sites_FunctionalSite"
@@ -94,223 +132,23 @@ N <- ceiling(hits_r/100)
 
 # Query the results
 query$resultType <- "results"
-query$outputFormat = "GeoJSON"
+query$outputFormat <- "GeoJSON"
+query$count <- 100
 
 results <- purrr::map_df(1:N, ~{
-  query$startIndex <- .x
+  query$startIndex <- (.x-1)*100
   httr::GET(base, path = path, query = query) |>
   sf::st_read(quiet = TRUE) |>
     suppressMessages() |>
     suppressWarnings()
 })
 
-results
+st_crs(results) <- 27700
 
-
-  
-
-```
-
-# Army Base
-
-## Functional Sites
-
-```{r}
-
-ymax <- 54.4004
-xmin <- -1.8299
-ymin <- 54.2789
-xmax <- -1.4989
-
-bbox_crds <- c(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)
-bbox <- st_bbox(bbox_crds, crs = 4326)
-bbox <- bbox |> st_as_sfc()
-bbox <- st_transform(bbox, 27700)
-
-bbox_bng <- paste(as.character(attributes(bbox)$bbox), collapse = ",")
-layer <- "Sites_FunctionalSite"
-
-# Query the hits
-query <- list(
-  service="wfs",
-  request="GetFeature",
-  version = "2.0.0",
-  key=api_key,
-  typeNames = layer,
-  srsName = "EPSG:27700",
-  resultType = "hits",
-  bbox = bbox_bng #!xml filter 
-  )
-
-hits <- httr::GET(base, path = path, query = query) |>
-  httr::content()
-
-(hits_r <- hits |>  xml2::xml_attrs() |> dplyr::nth(2) |> as.numeric())
-N <- ceiling(hits_r/100)
-
-# Query the results
-query$resultType <- "results"
-query$outputFormat = "GeoJSON"
-
-results <- httr::GET(base, path = path, query = query) |>
-  sf::st_read(quiet = TRUE)
-
-results |>
-  dplyr::as_tibble() |>
-  dplyr::group_by(SiteFunction) |>
-  dplyr::count(sort = TRUE)
-
-results |> dplyr::pull(DistinctiveName1)
-```
-
-## Topographic Line
-
-```{r}
-layer <- "Topography_TopographicLine"
-
-#Query the hits
-query <- list(
-  service="wfs",
-  request="GetFeature",
-  version = "2.0.0",
-  key=api_key,
-  typeNames = layer,
-  srsName = "EPSG:27700",
-  resultType = "hits",
-  bbox = bbox_bng #!xml filter 
-  )
-
-hits <- httr::GET(base, path = path, query = query) |>
-  httr::content()
-
-(hits_r <- hits |>  xml2::xml_attrs() |> dplyr::nth(2) |> as.numeric())
-N <- ceiling(hits_r/100)
-
-query$resultType <- "results"
-query$outputFormat <- NULL
-
-req <- httr::GET(base, path = path, query = query) 
-
-results <- httr::content(req) |>
-  xml2::xml_children() |>
-  xml2::as_list() |>
-  purrr::map_df(~unlist(.x$Topography_TopographicLine))
-
-
-results |>
-  dplyr::as_tibble() |>
-  dplyr::group_by(Theme) |>
-  dplyr::count(sort = TRUE)
-
-results |>
-  dplyr::as_tibble() |>
-  dplyr::group_by(DescriptiveGroup) |>
-  dplyr::count(sort = TRUE)
-
-results |>
-  dplyr::as_tibble() |>
-  dplyr::group_by(DescriptiveTerm) |>
-  dplyr::count(sort = TRUE)
+leaflet(results |> st_transform(4326)) |>
+  addTiles() |>
+  addPolygons(label = ~DistinctiveName1)
 
 
 ```
 
-## Zoomstack Sites
-
-```{r}
-layer <- "Zoomstack_Sites"
-
-#Query the hits
-query <- list(
-  service="wfs",
-  request="GetFeature",
-  version = "2.0.0",
-  key=api_key,
-  typeNames = layer,
-  srsName = "EPSG:27700",
-  resultType = "hits",
-  bbox = bbox_bng #!xml filter 
-  )
-
-hits <- httr::GET(base, path = path, query = query) |>
-  httr::content()
-
-(hits_r <- hits |>  xml2::xml_attrs() |> dplyr::nth(2) |> as.numeric())
-N <- ceiling(hits_r/100)
-
-query$resultType <- "results"
-query$outputFormat = "GeoJSON"
-
-results <- httr::GET(base, path = path, query = query) |>
-  sf::st_read(quiet = TRUE)
-
-results |>
-  dplyr::as_tibble() |>
-  dplyr::group_by(Type) |>
-  dplyr::count(sort = TRUE)
-
-```
-
-## Zoomstack Urban Areas
-
-```{r}
-layer <- "Zoomstack_UrbanAreas"
-
-#Query the hits
-query <- list(
-  service="wfs",
-  request="GetFeature",
-  version = "2.0.0",
-  key=api_key,
-  typeNames = layer,
-  srsName = "EPSG:27700",
-  resultType = "hits",
-  bbox = bbox_bng #!xml filter 
-  )
-
-hits <- httr::GET(base, path = path, query = query) |>
-  httr::content()
-
-(hits_r <- hits |>  xml2::xml_attrs() |> dplyr::nth(2) |> as.numeric())
-N <- ceiling(hits_r/100)
-
-query$resultType <- "results"
-query$outputFormat = "GeoJSON"
-
-results <- httr::GET(base, path = path, query = query) |>
-  sf::st_read(quiet = TRUE)
-
-results |>
-  dplyr::as_tibble() |>
-  dplyr::group_by(Type) |>
-  dplyr::count(sort = TRUE)
-```
-
-```{r}
-layer <- "Zoomstack_DistrictBuildings"
-#Query the hits
-query <- list(
-  service="wfs",
-  request="GetFeature",
-  version = "2.0.0",
-  key=api_key,
-  typeNames = layer,
-  srsName = "EPSG:27700",
-  resultType = "hits",
-  bbox = bbox_bng #!xml filter 
-  )
-
-hits <- httr::GET(base, path = path, query = query) |>
-  httr::content()
-
-(hits_r <- hits |>  xml2::xml_attrs() |> dplyr::nth(2) |> as.numeric())
-N <- ceiling(hits_r/100)
-
-query$resultType <- "results"
-query$outputFormat = "GeoJSON"
-
-results <- httr::GET(base, path = path, query = query) |>
-  sf::st_read(quiet = TRUE)
-
-
-```

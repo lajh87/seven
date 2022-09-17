@@ -46,5 +46,14 @@
   },
   "geocode-mil-sites-from-wiki.qmd": {
     "geocode-mil-sites-from-wiki.html": "50aea2a1"
+  },
+  "military-site-from-osm-bbox.qmd": {
+    "military-site-from-osm-bbox.html": "cf7bf4da"
+  },
+  "process-osm-data.qmd": {
+    "process-osm-data.html": "0df15709"
+  },
+  "tidy-cluster-osm-sites.qmd": {
+    "tidy-cluster-osm-sites.html": "be3770f6"
   }
 }
