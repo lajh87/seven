@@ -10,6 +10,9 @@ website:
       - section: "Basics"
         contents:
           - index.qmd
+      - section: "Acquire Data"
+        contents:
+          - military-sites-from-osm.qmd
       - section: "Landsat"
         contents:
           - calculating-lst-and-nvdi.qmd

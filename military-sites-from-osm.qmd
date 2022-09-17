@@ -1,0 +1,162 @@
+---
+title: "Military Sites from OSM"
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, warning = FALSE, message = FALSE}
+library(rnaturalearth)
+library(sf)
+library(ggplot2)
+library(osmdata)
+library(leaflet)
+source("R/postgis.R")
+```
+
+# Geospatial Extent
+
+## United Kingdom
+
+```{r}
+uk <- ne_countries(country = 'united kingdom') |>
+  st_as_sf()
+
+(p1 <- ggplot(uk) +
+  geom_sf(alpha = 0.5) + 
+  theme_minimal())
+
+```
+
+## Bounding Box
+
+```{r}
+(bbox_uk <- st_bbox(uk))
+
+```
+
+# Extract Data from Open Street Map
+
+If we try extracting for the whole country then the server will timeout.
+
+We therefore chunk it into bounding boxes.
+
+## Generating Chunks
+
+Create a grid over the uk
+
+```{r}
+g <- st_make_grid(uk, what = "polygons", n = 10) |> st_as_sf()
+g_clipped <- g[uk,]
+
+p1 + geom_sf(data = g_clipped, inherit.aes = FALSE, fill = NA, colour = "black")
+```
+
+Extract the bounding boxes
+
+```{r}
+bbox_g <- purrr::map(g_clipped$x, ~st_bbox(.x) |> as.numeric()) |>
+  unlist() |> 
+  matrix(ncol = 4, byrow = TRUE) |>
+  dplyr::as_tibble() |>
+  rlang::set_names(c("xmin", "ymin", "xmax", "ymax"))
+```
+
+## Extract Data
+
+Loop through bounding box and extract open street map features with key = 'landuse' and value = 'military'.
+
+### Landuse Military
+
+```{r, eval = FALSE}
+landuse_military <- purrr::map(1:nrow(bbox_g), ~{
+  tryCatch({
+    opq(bbox = as.numeric(bbox_g[.x,])) |>  
+      add_osm_feature(key = "landuse", value = "military") |>
+      osmdata_sf()
+    }, error = function(e) {
+    opq(bbox = as.numeric(bbox_g[.x,])) |>  
+        add_osm_feature(key = "landuse", value = "military") |>
+        osmdata_sf()
+  }, finally = NA)
+  })
+
+any(purrr::map_lgl(landuse_military, ~any(is.na(.x)))) # check
+
+```
+
+
+### Military
+
+```{r, eval = FALSE}
+military <- purrr::map(1:nrow(bbox_g), ~{
+  tryCatch({
+    opq(bbox = as.numeric(bbox_g[.x,])) |>  
+      add_osm_feature(key = "military") |>
+      osmdata_sf()
+    }, error = function(e) {
+    opq(bbox = as.numeric(bbox_g[.x,])) |>  
+        add_osm_feature(key = "military") |>
+        osmdata_sf()
+  }, finally = NA)
+  })
+
+any(purrr::map_lgl(military, ~any(is.na(.x)))) # check
+
+```
+
+### Process Data
+
+Extract the polygons from the osmdata object and combine.
+
+```{r, eval = FALSE}
+landuse_military_polygons <- purrr::map_df(landuse_military, ~.x$osm_polygons)
+military_polygons <- purrr::map_df(military, ~.x$osm_polygons)
+military_sites <- dplyr::bind_rows(landuse_military_polygons, military_polygons)
+
+military_sites <- military_sites |> 
+  dplyr::mutate(area = st_area(geometry)) |>
+  dplyr::select(osm_id, name, landuse, military, operator, area, geometry)
+```
+
+# Upload to PostGIS
+
+```{r, eval = FALSE}
+db <- connect_postgres()
+sf::st_write(military_sites, dsn = db, layer = "military_sites")
+DBI::dbDisconnect(db)
+```
+
+# Visualise
+
+```{r}
+db <- connect_postgres()
+military_sites <- sf::st_read(db, "military_sites")
+military_sites
+ggplot(military_sites) +
+  geom_sf() + 
+  theme_minimal()
+DBI::dbDisconnect(db)
+```
+
+# Summarise
+
+```{r}
+military_sites |>
+  dplyr::as_tibble() |>
+  dplyr::group_by(landuse) |>
+  dplyr::summarise(n = dplyr::n(), 
+                   avg_area = mean(area)) |>
+  dplyr::arrange(dplyr::desc(n))
+  
+
+military_sites |>
+  dplyr::as_tibble() |>
+  dplyr::group_by( military) |>
+   dplyr::summarise(n = dplyr::n(), 
+                   avg_area = mean(area)) |>
+  dplyr::arrange(dplyr::desc(n))
+  
+
+
+```
