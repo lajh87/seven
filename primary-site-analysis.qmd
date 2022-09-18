@@ -13,25 +13,42 @@ library(leaflet)
 source("R/postgis.R")
 ```
 
-# Fetch Primary Site Locations
+# Fetch primary site locations
 
 ```{r}
 db <- connect_postgres()
 mil_sites <- st_read(db, "military_site_clusters")
-
+mil_sites <- mil_sites |> st_transform(4326)
 
 raf_mob <- c("RAF Coningsby", "RAF Marham", "RAF Lossiemouth",
              "RAF Waddington", "RAF Brize Norton",
              "RAF Benson", "RAF Odiham")
 
-mil_sites |> 
+mil_sites_f <- mil_sites |> 
   dplyr::filter(name %in% raf_mob) |>
   dplyr::group_by(name) |>
   dplyr::summarise(geometry = st_union(geometry)) |>
   dplyr::mutate(area = st_area(geometry)) |>
-  dplyr::as_tibble() |>
-  dplyr::mutate(area = round(units::set_units(area, "km^2"),2)) |>
-  dplyr::select(name, area)
+  dplyr::mutate(area = round(units::set_units(area, "km^2"),2)) 
 
 DBI::dbDisconnect(db)
 ```
+
+# Check which landsat images that the sites fall under
+
+```{r}
+wrs2d <- st_read("data/WRS2_descending_0/WRS2_descending.shp")
+wrs2d <- st_transform(wrs2d, 4326)
+
+intersects <- st_intersects(mil_sites_f, wrs2d)
+index <- unlist(intersects) |> unique() |> sort()
+(wrs2d_f <- wrs2d[index, c("PATH", "ROW")])
+plot(wrs2d_f$geometry)
+
+```
+
+# Extract a non-cloudy day in Apr-May
+
+# Create bulk order
+
+# Calculate NVDI and LST

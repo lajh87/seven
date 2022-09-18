@@ -196,6 +196,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
    
   <ul>
   <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup">Setup</a></li>
+  <li><a href="#fetch-primary-site-locations" id="toc-fetch-primary-site-locations" class="nav-link" data-scroll-target="#fetch-primary-site-locations">Fetch primary site locations</a></li>
+  <li><a href="#check-which-landsat-images-that-the-sites-fall-under" id="toc-check-which-landsat-images-that-the-sites-fall-under" class="nav-link" data-scroll-target="#check-which-landsat-images-that-the-sites-fall-under">Check which landsat images that the sites fall under</a></li>
+  <li><a href="#extract-a-non-cloudy-day-in-apr-may" id="toc-extract-a-non-cloudy-day-in-apr-may" class="nav-link" data-scroll-target="#extract-a-non-cloudy-day-in-apr-may">Extract a non-cloudy day in Apr-May</a></li>
+  <li><a href="#create-bulk-order" id="toc-create-bulk-order" class="nav-link" data-scroll-target="#create-bulk-order">Create bulk order</a></li>
+  <li><a href="#calculate-nvdi-and-lst" id="toc-calculate-nvdi-and-lst" class="nav-link" data-scroll-target="#calculate-nvdi-and-lst">Calculate NVDI and LST</a></li>
   </ul>
 </nav>
     </div>
@@ -220,10 +225,82 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <section id="setup" class="level1">
 <h1>Setup</h1>
+<p>Load libraries and functions.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(leaflet)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(leaflet)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"R/postgis.R"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="fetch-primary-site-locations" class="level1">
+<h1>Fetch primary site locations</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>db <span class="ot">&lt;-</span> <span class="fu">connect_postgres</span>()</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>mil_sites <span class="ot">&lt;-</span> <span class="fu">st_read</span>(db, <span class="st">"military_site_clusters"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>mil_sites <span class="ot">&lt;-</span> mil_sites <span class="sc">|&gt;</span> <span class="fu">st_transform</span>(<span class="dv">4326</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>raf_mob <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"RAF Coningsby"</span>, <span class="st">"RAF Marham"</span>, <span class="st">"RAF Lossiemouth"</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>             <span class="st">"RAF Waddington"</span>, <span class="st">"RAF Brize Norton"</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>             <span class="st">"RAF Benson"</span>, <span class="st">"RAF Odiham"</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>mil_sites_f <span class="ot">&lt;-</span> mil_sites <span class="sc">|&gt;</span> </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(name <span class="sc">%in%</span> raf_mob) <span class="sc">|&gt;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(name) <span class="sc">|&gt;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">geometry =</span> <span class="fu">st_union</span>(geometry)) <span class="sc">|&gt;</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">area =</span> <span class="fu">st_area</span>(geometry)) <span class="sc">|&gt;</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">area =</span> <span class="fu">round</span>(units<span class="sc">::</span><span class="fu">set_units</span>(area, <span class="st">"km^2"</span>),<span class="dv">2</span>)) </span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbDisconnect</span>(db)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="check-which-landsat-images-that-the-sites-fall-under" class="level1">
+<h1>Check which landsat images that the sites fall under</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>wrs2d <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"data/WRS2_descending_0/WRS2_descending.shp"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `WRS2_descending' from data source 
+  `C:\Users\lukeh\Documents\quarto\seven\data\WRS2_descending_0\WRS2_descending.shp' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 28892 features and 14 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: -180 ymin: -82.6401 xmax: 180 ymax: 82.6401
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>wrs2d <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(wrs2d, <span class="dv">4326</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>intersects <span class="ot">&lt;-</span> <span class="fu">st_intersects</span>(mil_sites_f, wrs2d)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>index <span class="ot">&lt;-</span> <span class="fu">unlist</span>(intersects) <span class="sc">|&gt;</span> <span class="fu">unique</span>() <span class="sc">|&gt;</span> <span class="fu">sort</span>()</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>(wrs2d_f <span class="ot">&lt;-</span> wrs2d[index, <span class="fu">c</span>(<span class="st">"PATH"</span>, <span class="st">"ROW"</span>)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 7 features and 2 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: -6.32169 ymin: 50.7618 xmax: 2.79175 ymax: 58.2621
+Geodetic CRS:  WGS 84
+      PATH ROW                       geometry
+3368   205  20 MULTIPOLYGON (((-4.775483 5...
+6968   203  24 MULTIPOLYGON (((-4.2758 51....
+10439  201  23 MULTIPOLYGON (((-0.5901946 ...
+10440  201  24 MULTIPOLYGON (((-1.18568 51...
+16016  206  20 MULTIPOLYGON (((-6.320563 5...
+23211  202  23 MULTIPOLYGON (((-2.135236 5...
+23212  202  24 MULTIPOLYGON (((-2.730721 5...</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wrs2d_f<span class="sc">$</span>geometry)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="primary-site-analysis_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="extract-a-non-cloudy-day-in-apr-may" class="level1">
+<h1>Extract a non-cloudy day in Apr-May</h1>
+</section>
+<section id="create-bulk-order" class="level1">
+<h1>Create bulk order</h1>
+</section>
+<section id="calculate-nvdi-and-lst" class="level1">
+<h1>Calculate NVDI and LST</h1>
 
 
 </section>

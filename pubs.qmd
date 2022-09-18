@@ -1,0 +1,55 @@
+---
+title: "Pubs Near Me"
+editor: visual
+---
+
+# Pubs Near Me
+
+```{r}
+library(ggmap)
+library(leaflet)
+library(osmdata)
+library(sf)
+g <- geocode("Bampton, Oxford")
+# -1.549105	51.72345	
+
+df <- data.frame(location = "Bampton, Oxfordshire", g)
+spdf <- sf::st_as_sf(df, coords = c("lon", "lat"), crs = 4326)
+buffer <- st_buffer(spdf, 10e3) 
+
+bbox <- buffer |>
+  st_bbox() 
+
+leaflet(buffer) |>
+  addTiles() |>
+  addPolygons()
+
+
+osm <- opq(bbox = as.numeric(bbox)) |>  
+      add_osm_feature(key = "amenity", value = "pub") |>
+      osmdata_sf()
+
+pub_polys <- osm$osm_polygons
+pub_points <- osm$osm_points
+
+points_in_polys <- pub_points[pub_polys,]
+
+pub_point_poly <- pub_points |>
+  dplyr::filter(!osm_id %in% points_in_polys$osm_id) |>
+  dplyr::select(osm_id, name) |>
+  dplyr::bind_rows(
+    pub_polys |>
+      dplyr::select(osm_id, name)
+  )
+
+pub_point_poly |>
+  dplyr::as_tibble() |>
+  dplyr::group_by(name) |>
+  dplyr::count(sort = TRUE)
+
+
+
+
+
+
+```

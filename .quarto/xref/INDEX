@@ -70,5 +70,11 @@
   },
   "exploit.qmd": {
     "exploit.html": "a5576340"
+  },
+  "pubs.Rmd": {
+    "pubs.html": "ac3a2d3b"
+  },
+  "pubs.qmd": {
+    "pubs.html": "f3bdfd07"
   }
 }
