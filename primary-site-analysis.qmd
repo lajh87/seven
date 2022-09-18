@@ -1,0 +1,37 @@
+---
+title: "Primary Site Analysis"
+editor: visual
+---
+
+# Setup
+
+Load libraries and functions.
+
+```{r, warning=FALSE, message = FALSE}
+library(sf)
+library(leaflet)
+source("R/postgis.R")
+```
+
+# Fetch Primary Site Locations
+
+```{r}
+db <- connect_postgres()
+mil_sites <- st_read(db, "military_site_clusters")
+
+
+raf_mob <- c("RAF Coningsby", "RAF Marham", "RAF Lossiemouth",
+             "RAF Waddington", "RAF Brize Norton",
+             "RAF Benson", "RAF Odiham")
+
+mil_sites |> 
+  dplyr::filter(name %in% raf_mob) |>
+  dplyr::group_by(name) |>
+  dplyr::summarise(geometry = st_union(geometry)) |>
+  dplyr::mutate(area = st_area(geometry)) |>
+  dplyr::as_tibble() |>
+  dplyr::mutate(area = round(units::set_units(area, "km^2"),2)) |>
+  dplyr::select(name, area)
+
+DBI::dbDisconnect(db)
+```

@@ -3,30 +3,52 @@ project:
   output-dir: docs
   
 website:
-  sidebar:
-    style: "docked"
+  title: Seven
+  navbar:
+    background: primary
     search: true
-    contents:
-      - section: "Basics"
+    left:
+      - text: "Home"
+        file: index.qmd
+      - text: "Acquire"
+        file: acquire.qmd
+      - text: "Exploit"
+        file: exploit.qmd
+        
+  sidebar:
+      - title: "Acquire"
+        style: "floating"
+        search: true
         contents:
-          - index.qmd
-      - section: "Acquire Data"
+        - text: "Acquire"
+          href:   acquire.qmd
+        - section: "Basics"
+          contents:
+           - postgis-bbox-query.qmd
+           - geocode-mil-sites-from-wiki.qmd
+        - section: "OpenStreetMap"
+          contents:
+           - military-sites-from-osm.qmd
+           - military-site-from-osm-bbox.qmd
+           - process-osm-data.qmd
+        - section: "Ordnance Survey"
+          contents:         
+            - os-api.qmd
+            - os-building-height.qmd
+            - os-api-mil-sites.qmd
+            - os-download-buildings.qmd
+        - section: "Landsat"
+          contents:
+           - landsat-api.qmd
+           - calculating-lst-and-nvdi.qmd
+           - mask-clouds.qmd
+           - lst-by-building.qmd
+           - site-lst-ratio.qmd
+      
+      - title: "Exploit"
         contents:
-          - military-sites-from-osm.qmd
-          - military-site-from-osm-bbox.qmd
-          - process-osm-data.qmd
-          - geocode-mil-sites-from-wiki.qmd
-          - os-api.qmd
-          - os-building-height.qmd
-          - os-api-mil-sites.qmd
-          - postgis-bbox-query.qmd
-      - section: "Landsat"
-        contents:
-          - calculating-lst-and-nvdi.qmd
-          - mask-clouds.qmd
-          - lst-by-building.qmd
-          - site-lst-ratio.qmd
-
+        - exploit.qmd
+        - primary-site-analysis.qmd
 format:
   html:
     theme: flatly

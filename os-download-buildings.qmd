@@ -1,0 +1,200 @@
+---
+title: "Download Buildings"
+editor: visual
+---
+
+```{r}
+library(sf)
+library(leaflet)
+library(ggplot2)
+source("R/postgis.R")
+api_key <- Sys.getenv("OS_PROJECT_API_KEY")
+base <- "https://api.os.uk"
+path <- "/features/v1/wfs"
+```
+
+```{r}
+db <- connect_postgres()
+sites <- st_read(db, "military_site_clusters")
+DBI::dbDisconnect(db)
+```
+
+```{r}
+sites <- sites |>
+  st_transform(27700) |>
+  dplyr::mutate(area = st_area(geometry)) |>
+  st_transform(4326) |>
+  dplyr::mutate(area_km = units::set_units(area, "km^2"))
+  
+```
+
+```{r}
+sites_filtered <- sites |>
+  dplyr::filter(area > units::as_units(1000, "m^2")) |>
+  dplyr::filter(!grepl("^WW", name)) |>
+  dplyr::filter(area < units::as_units(5, "km^2"))
+
+```
+
+```{r}
+sites_filtered[1,] |>
+  leaflet() |>
+  addTiles() |>
+  addPolygons()
+
+```
+
+```{r, eval = FALSE}
+sites_filtered_bng <- sites_filtered |>
+  st_transform(27700) 
+
+bbox <- purrr::map(sites_filtered_bng$geometry, ~{
+  st_bbox(.x)
+})
+
+bbox_df <- bbox |>
+  unlist() |>
+  matrix(ncol = 4, byrow = TRUE) |>
+  dplyr::as_tibble() |>
+  rlang::set_names(c("xmin", "ymin", "xmax", "ymax")) |>
+  dplyr::bind_rows()
+
+```
+
+```{r, eval = FALSE}
+filter_xml <- function(
+    bbox_chr = "436833.50,115334.90,437643.25,115761.50",
+    descriptive_group = "Building"){
+  
+  glue::glue(
+  '<ogc:Filter>
+  <ogc:And>
+    <ogc:Within>
+      <PropertyName>SHAPE</PropertyName>
+      <gml:Box xmlns:gml="http://www.opengis.net/gml" srsName="EPSG:27700">
+        <gml:coordinates decimal="." cs="," ts=",">
+          {bbox_chr}
+        </gml:coordinates>
+      </gml:Box>
+    </ogc:Within>
+    <ogc:PropertyIsEqualTo>
+      <ogc:PropertyName>DescriptiveGroup</ogc:PropertyName>
+      <ogc:Literal>{descriptive_group}</ogc:Literal>
+    </ogc:PropertyIsEqualTo>
+  </ogc:And>
+</ogc:Filter>')
+  
+}
+
+# Function loops through the bounding boxes and extracts buildings
+mil_bld <- purrr::map(1:nrow(bbox_df), ~{
+  print(paste(.x, "of", nrow(bbox_df)))
+  chr <- bbox_df[.x,] |> unlist() |> as.numeric() |> paste(collapse = ",")
+  xml <- filter_xml(chr)
+
+  layer <- "Topography_TopographicArea"
+  
+  # Get Hits
+  query <- list(
+    service="wfs",
+    request="GetFeature",
+    version = "2.0.0",
+    key= api_key,
+    typeNames = layer,
+    resultType = "hits",
+    srsName = "EPSG:27700",
+    filter = xml
+  )
+  
+  hits <- 
+    tryCatch({
+      httr::GET(base, path = path, query = query) |>
+        httr::content()}, 
+      error=function(e){
+        httr::GET(base, path = path, query = query) |>
+        httr::content()
+      }, finally = NA)
+  
+  if(is.na(hits)) return(NA)
+    
+  hits_r <- hits |>  
+    xml2::xml_attrs() |> 
+    dplyr::nth(2) |> 
+    as.numeric()
+    
+  N <- ceiling(hits_r/100)
+    
+  # Query the results
+  query$resultType <- "results"
+  query$outputFormat = "GeoJSON"
+  query$count <- 100 # needed for paging
+  
+  results <- purrr::map(1:N, ~{
+    query$startIndex = (.x-1)*100 # Starts from 0
+    tryCatch({
+      httr::GET(base, path = path, query = query) |>
+        sf::st_read(quiet = TRUE) |> 
+        suppressMessages() |> 
+        suppressWarnings()
+      }, error = function(e){
+        httr::GET(base, path = path, query = query) |> 
+          sf::st_read(quiet = TRUE) |> 
+          suppressMessages() |> 
+          suppressWarnings()
+      }, finally = NA)
+  })
+  
+  if(length(results)==1 && is.na(results)) return(NA)
+  
+  results2 <- purrr::map(results, ~{
+    .x$BHATopoAreaVersion <- as.numeric(.x$BHATopoAreaVersion)
+    .x$AbsHMin <- as.numeric(.x$AbsHMin) 
+    .x$AbsH2 <- as.numeric(.x$AbsH2) 
+    .x$AbsHMax <- as.numeric(.x$AbsHMax) 
+    .x$RelH2 <- as.numeric(.x$RelH2)
+    .x$RelHMax <- as.numeric(.x$RelHMax) 
+    .x$BHAConf <- as.numeric(.x$BHAConf)
+    .x
+  })
+  
+  results3 <- results2 |> 
+    dplyr::bind_rows() |>
+    dplyr::mutate(site_id = .x)
+  
+  site_n <- sites_filtered[.x, ]
+  st_crs(results3) <- 27700
+  results3 <- st_transform(results3, 4326)
+  
+  results3[site_n,]
+  })
+
+
+```
+
+```{r, eval = FALSE}
+missing <- mil_bld |> 
+  purrr::map_lgl(~all(is.na(.x))) 
+
+```
+
+```{r, eval = FALSE}
+mil_bld2 <- mil_bld |>
+  dplyr::bind_rows() |>
+  dplyr::mutate(site_id = as.numeric(site_id)) |>
+  dplyr::left_join(
+    dplyr::tibble(
+      site_id = as.numeric(row.names(sites_filtered)), 
+      cluster = as.numeric(sites_filtered$cluster)
+    ),
+    by = "site_id")
+```
+
+```{r, eval = FALSE}
+db <- connect_postgres()
+st_write(mil_bld2, db, "military_buildings")
+DBI::dbDisconnect(db)
+
+```
+
+
+

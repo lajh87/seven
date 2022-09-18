@@ -55,5 +55,20 @@
   },
   "tidy-cluster-osm-sites.qmd": {
     "tidy-cluster-osm-sites.html": "be3770f6"
+  },
+  "os-download-buildings.qmd": {
+    "os-download-buildings.html": "422fb0be"
+  },
+  "landsat-api.qmd": {
+    "landsat-api.html": "2b47d651"
+  },
+  "primary-site-analysis.qmd": {
+    "primary-site-analysis.html": "44e2addc"
+  },
+  "acquire.qmd": {
+    "acquire.html": "540bdc09"
+  },
+  "exploit.qmd": {
+    "exploit.html": "a5576340"
   }
 }
