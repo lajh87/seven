@@ -8,8 +8,6 @@ website:
     background: primary
     search: true
     left:
-      - text: "Home"
-        file: index.qmd
       - text: "Acquire"
         file: acquire.qmd
       - text: "Exploit"
@@ -40,14 +38,18 @@ website:
           contents:
            - landsat-api.qmd
            - download-landsat-primary-sites.qmd
-
+        - section: "PostGIS"
+          contents: 
+           - postgis-bbox-query.qmd
+           - raster-from-postgis.qmd
       - title: "Exploit"
         contents:
         - exploit.qmd
-        - postgis-bbox-query.qmd
+
         - section: "Landsat"
           contents:
           - calculate-store-nvdi.qmd
+          - cloud-cover-multisite.qmd
           - calculating-lst-and-nvdi.qmd
           - mask-clouds.qmd
           - lst-by-building.qmd

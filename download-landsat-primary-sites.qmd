@@ -90,4 +90,3 @@ A bulk order was created using [EarthExplorer](https://earthexplorer.usgs.gov/).
 The [Landsat 8-9 OLI/TIRS C2 L2](https://doi.org/10.5066/P9OGBGM6) dataset was selected.
 
 DisplayId were inputted into the Landsat Product Identifier L2 field.
-

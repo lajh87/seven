@@ -82,5 +82,11 @@
   },
   "calculate-store-nvdi.qmd": {
     "calculate-store-nvdi.html": "c130eedd"
+  },
+  "raster-from-postgis.qmd": {
+    "raster-from-postgis.html": "008e95e9"
+  },
+  "cloud-cover-multisite.qmd": {
+    "cloud-cover-multisite.html": "145c4479"
   }
 }

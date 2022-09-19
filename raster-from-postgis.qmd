@@ -1,0 +1,41 @@
+---
+title: "Query Raster from PostGIS"
+editor: visual
+---
+
+```{r}
+library(sf)
+library(sp)
+library(rpostgis)
+source("R/postgis.R")
+db <- connect_postgres()
+DBI::dbListTables(db)
+
+system.time(
+  r <- pgGetRast(db, name = "NVDILC09_L2SP_202024_20220522_20220524_02_T1")
+)
+
+# user  system elapsed 
+# 38.69    3.31  102.92 
+
+# Extract bounding box
+lng1 <- -1.664772
+lat1 <- 51.722137
+lng2 <- -1.530704
+lat2 <- 51.777665
+
+bbox <- st_bbox(c(xmin = lng1, xmax = lng2, ymin = lat1, ymax = lat2), crs = 4326)
+bbox <- bbox |> st_as_sfc()
+bbox <- bbox |> st_transform("+proj=utm +zone=30 +datum=WGS84 +units=m +no_defs")
+bbox <- bbox |> as(Class = "Spatial")
+
+system.time(
+  r2 <-  pgGetRast(db, name = "NVDILC09_L2SP_202024_20220522_20220524_02_T1", boundary = bbox)
+)
+
+# user  system elapsed 
+# 0.22    0.00    0.46 
+
+plot(r2)
+DBI::dbDisconnect(db)
+```

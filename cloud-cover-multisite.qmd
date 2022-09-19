@@ -1,0 +1,55 @@
+---
+title: "Cloud Cover"
+editor: visual
+---
+
+```{r}
+
+library(sf)
+library(leaflet)
+source("R/postgis.R")
+source("R/landsat-api.R")
+
+db <- connect_postgres()
+mil_sites <- st_read(db, "military_site_clusters")
+mil_sites <- mil_sites |> st_transform(4326)
+
+raf_mob <- c("RAF Coningsby", "RAF Marham", "RAF Lossiemouth",
+             "RAF Waddington", "RAF Brize Norton",
+             "RAF Benson", "RAF Odiham")
+
+mil_sites_f <- mil_sites |> 
+  dplyr::filter(name %in% raf_mob) |>
+  dplyr::group_by(name) |>
+  dplyr::summarise(geometry = st_union(geometry)) |>
+  dplyr::mutate(area = st_area(geometry)) |>
+  dplyr::mutate(area = round(units::set_units(area, "km^2"),2)) 
+
+
+
+wrs2d <- st_read("data/WRS2_descending_0/WRS2_descending.shp")
+wrs2d <- st_transform(wrs2d, 4326)
+
+intersects <- st_intersects(mil_sites_f, wrs2d)
+site_path <- purrr::map(intersects, ~{
+  wrs2d[.x, c("PATH", "ROW", "PR")] 
+})
+
+sites <- mil_sites_f$name
+
+(site_path <- seq_along(site_path) |>
+  purrr::map(~site_path[[.x]] |>
+               dplyr::mutate(site = mil_sites_f$name[.x])) |>
+  dplyr::bind_rows())
+
+```
+
+```{r}
+# Load the File that Corresponds to the Site Path
+
+# Clip to the Site
+
+# Calculate Cloud Cover
+
+# If more that one then select file with lowest cloud cover.
+```

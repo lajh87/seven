@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Seven - Calculate LST and NVDI</title>
+<title>Seven - Cloud Cover</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -155,7 +155,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     </nav>
   <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
     <div class="container-fluid d-flex justify-content-between">
-      <h1 class="quarto-secondary-nav-title">Calculate LST and NVDI</h1>
+      <h1 class="quarto-secondary-nav-title">Cloud Cover</h1>
       <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
         <i class="bi bi-chevron-right"></i>
       </button>
@@ -193,7 +193,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./calculating-lst-and-nvdi.html" class="sidebar-item-text sidebar-link active">Calculate LST and NVDI</a>
+  <a href="./cloud-cover-multisite.html" class="sidebar-item-text sidebar-link active">Cloud Cover</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./calculating-lst-and-nvdi.html" class="sidebar-item-text sidebar-link">Calculate LST and NVDI</a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -225,7 +230,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Calculate LST and NVDI</h1>
+<h1 class="title d-none d-lg-block">Cloud Cover</h1>
 </div>
 
 
@@ -240,83 +245,83 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </header>
 
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># https://downloads.hindawi.com/journals/js/2016/1480307.pdf</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># http://www.gisandbeers.com/GeoBazar/Libros/Teledeteccion/Manual-Landsat-9-Handbook.pdf</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(raster)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: sp</code></pre>
+<pre><code>Linking to GEOS 3.9.1, GDAL 3.4.3, PROJ 7.2.1; sf_use_s2() is TRUE</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load data</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="st">"../../../OneDrive/Data/landstat/LC09_L2SP_202024_20220826_20220830_02_T1/"</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>red <span class="ot">=</span> <span class="fu">raster</span>(<span class="fu">file.path</span>(d, <span class="st">"LC09_L2SP_202024_20220826_20220830_02_T1_SR_B4.TIF"</span>))</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>near.infrared <span class="ot">=</span> <span class="fu">raster</span>(<span class="fu">file.path</span>(d, <span class="st">"LC09_L2SP_202024_20220826_20220830_02_T1_SR_B5.TIF"</span>))</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>band_10 <span class="ot">=</span> <span class="fu">raster</span>(<span class="fu">file.path</span>(d, <span class="st">"LC09_L2SP_202024_20220826_20220830_02_T1_ST_B10.TIF"</span>))</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">&lt;-</span> <span class="fu">readLines</span>(<span class="fu">file.path</span>(d, <span class="st">"LC09_L2SP_202024_20220826_20220830_02_T1_MTL.txt"</span>))</span>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(leaflet)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"R/postgis.R"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"R/landsat-api.R"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>db <span class="ot">&lt;-</span> <span class="fu">connect_postgres</span>()</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>mil_sites <span class="ot">&lt;-</span> <span class="fu">st_read</span>(db, <span class="st">"military_site_clusters"</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>mil_sites <span class="ot">&lt;-</span> mil_sites <span class="sc">|&gt;</span> <span class="fu">st_transform</span>(<span class="dv">4326</span>)</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>M_L <span class="ot">&lt;-</span> meta[stringr<span class="sc">::</span><span class="fu">str_detect</span>(meta, <span class="st">"RADIANCE_MULT_BAND_10"</span>)] <span class="sc">|&gt;</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  stringr<span class="sc">::</span><span class="fu">str_split</span>(<span class="st">" = "</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unlist</span>() <span class="sc">|&gt;</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">nth</span>(<span class="dv">2</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.numeric</span>()</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>A_L <span class="ot">&lt;-</span> meta[stringr<span class="sc">::</span><span class="fu">str_detect</span>(meta, <span class="st">"RADIANCE_ADD_BAND_10"</span>)] <span class="sc">|&gt;</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  stringr<span class="sc">::</span><span class="fu">str_split</span>(<span class="st">" = "</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unlist</span>() <span class="sc">|&gt;</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">nth</span>(<span class="dv">2</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.numeric</span>()</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>raf_mob <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"RAF Coningsby"</span>, <span class="st">"RAF Marham"</span>, <span class="st">"RAF Lossiemouth"</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>             <span class="st">"RAF Waddington"</span>, <span class="st">"RAF Brize Norton"</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>             <span class="st">"RAF Benson"</span>, <span class="st">"RAF Odiham"</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>mil_sites_f <span class="ot">&lt;-</span> mil_sites <span class="sc">|&gt;</span> </span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(name <span class="sc">%in%</span> raf_mob) <span class="sc">|&gt;</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(name) <span class="sc">|&gt;</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">geometry =</span> <span class="fu">st_union</span>(geometry)) <span class="sc">|&gt;</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">area =</span> <span class="fu">st_area</span>(geometry)) <span class="sc">|&gt;</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">area =</span> <span class="fu">round</span>(units<span class="sc">::</span><span class="fu">set_units</span>(area, <span class="st">"km^2"</span>),<span class="dv">2</span>)) </span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>toa <span class="ot">&lt;-</span> M_L <span class="sc">*</span> band_10 <span class="sc">+</span> A_L</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>K_1 <span class="ot">&lt;-</span> meta[stringr<span class="sc">::</span><span class="fu">str_detect</span>(meta, <span class="st">"K1_CONSTANT_BAND_10"</span>)] <span class="sc">|&gt;</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  stringr<span class="sc">::</span><span class="fu">str_split</span>(<span class="st">" = "</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unlist</span>() <span class="sc">|&gt;</span></span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">nth</span>(<span class="dv">2</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.numeric</span>()</span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>K_2 <span class="ot">&lt;-</span> meta[stringr<span class="sc">::</span><span class="fu">str_detect</span>(meta, <span class="st">"K2_CONSTANT_BAND_10"</span>)] <span class="sc">|&gt;</span></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  stringr<span class="sc">::</span><span class="fu">str_split</span>(<span class="st">" = "</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unlist</span>() <span class="sc">|&gt;</span></span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">nth</span>(<span class="dv">2</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.numeric</span>()</span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>BT <span class="ot">&lt;-</span> (K_2 <span class="sc">/</span> (<span class="fu">log</span>(K_1<span class="sc">/</span>toa)<span class="sc">+</span><span class="dv">1</span>))<span class="sc">-</span> <span class="fl">273.15</span> <span class="co"># kevin to celcius</span></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>nvdi_s <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>nvdi_v <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>nvdi <span class="ot">&lt;-</span> (near.infrared <span class="sc">-</span> red)<span class="sc">/</span>(near.infrared <span class="sc">+</span> red)</span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>p_v <span class="ot">&lt;-</span> nvdi</span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>p_v<span class="sc">@</span>data<span class="sc">@</span>values <span class="ot">&lt;-</span> ((p_v<span class="sc">@</span>data<span class="sc">@</span>values <span class="sc">-</span> nvdi_s)<span class="sc">/</span>(nvdi_v<span class="sc">-</span>nvdi_s))<span class="sc">^</span><span class="dv">2</span></span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="co"># If nvdi less than 0 then water and emissivity (e_w) is 0.991</span></span>
-<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="co"># If nvdi &lt; nvdi_s then emissivity (e_s) is 0.0996</span></span>
-<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="co"># If nvdi &gt; nvdi_v then emissivity (e_v) is 0.973</span></span>
-<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="co"># if nvdi is between 0.2 and 0.5 then  e_v*P_V + e_s(1-P_V)+C_l</span></span>
-<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>e_w <span class="ot">&lt;-</span> <span class="fl">0.991</span></span>
-<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>e_s <span class="ot">&lt;-</span> <span class="fl">0.996</span></span>
-<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>e_v <span class="ot">&lt;-</span> <span class="fl">0.973</span></span>
-<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>C_l <span class="ot">&lt;-</span> <span class="fl">0.005</span> <span class="co"># correction</span></span>
-<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>e <span class="ot">&lt;-</span> p_v</span>
-<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>e<span class="sc">@</span>data<span class="sc">@</span>values <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(</span>
-<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>  e<span class="sc">@</span>data<span class="sc">@</span>values <span class="sc">&lt;=</span> <span class="dv">0</span>, e_w, <span class="fu">ifelse</span>(</span>
-<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>    e<span class="sc">@</span>data<span class="sc">@</span>values <span class="sc">&gt;</span><span class="dv">0</span> <span class="sc">&amp;</span> e<span class="sc">@</span>data<span class="sc">@</span>values <span class="sc">&lt;=</span> nvdi_s, e_s, <span class="fu">ifelse</span>(</span>
-<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>      e<span class="sc">@</span>data<span class="sc">@</span>values <span class="sc">&gt;</span> nvdi_s <span class="sc">&amp;</span> e<span class="sc">@</span>data<span class="sc">@</span>values <span class="sc">&lt;=</span> nvdi_v, e_v <span class="sc">*</span> e<span class="sc">@</span>data<span class="sc">@</span>values <span class="sc">+</span> e_s <span class="sc">*</span> (<span class="dv">1</span><span class="sc">-</span>e<span class="sc">@</span>data<span class="sc">@</span>values) <span class="sc">+</span> C_l, e_v</span>
-<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>      )</span>
-<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>lambda <span class="ot">&lt;-</span> <span class="fl">10.895</span> <span class="co"># average limiting wavelength</span></span>
-<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">1.438</span> <span class="sc">*</span> <span class="fl">10e-2</span> <span class="co"># see paper</span></span>
-<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>LST <span class="ot">&lt;-</span> (BT <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> (<span class="fl">0.0010895</span> <span class="sc">*</span> BT <span class="sc">/</span> <span class="fl">1.4388</span>) <span class="sc">*</span> <span class="fu">log</span>(e)))</span>
-<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(LST)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="calculating-lst-and-nvdi_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>wrs2d <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"data/WRS2_descending_0/WRS2_descending.shp"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `WRS2_descending' from data source 
+  `C:\Users\lukeh\Documents\quarto\seven\data\WRS2_descending_0\WRS2_descending.shp' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 28892 features and 14 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: -180 ymin: -82.6401 xmax: 180 ymax: 82.6401
+Geodetic CRS:  WGS 84</code></pre>
 </div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>wrs2d <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(wrs2d, <span class="dv">4326</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>intersects <span class="ot">&lt;-</span> <span class="fu">st_intersects</span>(mil_sites_f, wrs2d)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>site_path <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map</span>(intersects, <span class="sc">~</span>{</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  wrs2d[.x, <span class="fu">c</span>(<span class="st">"PATH"</span>, <span class="st">"ROW"</span>, <span class="st">"PR"</span>)] </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>sites <span class="ot">&lt;-</span> mil_sites_f<span class="sc">$</span>name</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>(site_path <span class="ot">&lt;-</span> <span class="fu">seq_along</span>(site_path) <span class="sc">|&gt;</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  purrr<span class="sc">::</span><span class="fu">map</span>(<span class="sc">~</span>site_path[[.x]] <span class="sc">|&gt;</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>               dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">site =</span> mil_sites_f<span class="sc">$</span>name[.x])) <span class="sc">|&gt;</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">bind_rows</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 12 features and 4 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: -6.32169 ymin: 50.7618 xmax: 2.79175 ymax: 58.2621
+Geodetic CRS:  WGS 84
+First 10 features:
+   PATH ROW     PR             site                       geometry
+1   202  24 202024       RAF Benson MULTIPOLYGON (((-2.730721 5...
+2   203  24 203024 RAF Brize Norton MULTIPOLYGON (((-4.2758 51....
+3   202  24 202024 RAF Brize Norton MULTIPOLYGON (((-2.730721 5...
+4   201  23 201023    RAF Coningsby MULTIPOLYGON (((-0.5901946 ...
+5   202  23 202023    RAF Coningsby MULTIPOLYGON (((-2.135236 5...
+6   205  20 205020  RAF Lossiemouth MULTIPOLYGON (((-4.775483 5...
+7   206  20 206020  RAF Lossiemouth MULTIPOLYGON (((-6.320563 5...
+8   201  23 201023       RAF Marham MULTIPOLYGON (((-0.5901946 ...
+9   202  23 202023       RAF Marham MULTIPOLYGON (((-2.135236 5...
+10  201  24 201024       RAF Odiham MULTIPOLYGON (((-1.18568 51...</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the File that Corresponds to the Site Path</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Clip to the Site</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate Cloud Cover</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># If more that one then select file with lowest cloud cover.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
