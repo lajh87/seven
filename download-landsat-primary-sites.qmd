@@ -1,0 +1,93 @@
+---
+title: "Bulk Download Primary Sites"
+editor: visual
+---
+
+# Setup
+
+Load libraries and functions.
+
+```{r, warning=FALSE, message = FALSE}
+library(sf)
+library(leaflet)
+source("R/postgis.R")
+source("R/landsat-api.R")
+```
+
+# Fetch primary site locations
+
+```{r}
+db <- connect_postgres()
+mil_sites <- st_read(db, "military_site_clusters")
+mil_sites <- mil_sites |> st_transform(4326)
+
+raf_mob <- c("RAF Coningsby", "RAF Marham", "RAF Lossiemouth",
+             "RAF Waddington", "RAF Brize Norton",
+             "RAF Benson", "RAF Odiham")
+
+mil_sites_f <- mil_sites |> 
+  dplyr::filter(name %in% raf_mob) |>
+  dplyr::group_by(name) |>
+  dplyr::summarise(geometry = st_union(geometry)) |>
+  dplyr::mutate(area = st_area(geometry)) |>
+  dplyr::mutate(area = round(units::set_units(area, "km^2"),2)) 
+
+DBI::dbDisconnect(db)
+```
+
+# Check which landsat images that the sites fall under
+
+```{r}
+wrs2d <- st_read("data/WRS2_descending_0/WRS2_descending.shp")
+wrs2d <- st_transform(wrs2d, 4326)
+
+intersects <- st_intersects(mil_sites_f, wrs2d)
+index <- unlist(intersects) |> unique() |> sort()
+(wrs2d_f <- wrs2d[index, c("PATH", "ROW", "PR")])
+plot(wrs2d_f$geometry)
+
+```
+
+# Extract the least cloudy day between Apr - June
+
+```{r}
+
+extract_element <- function(x, n){
+  purrr::map_chr(stringr::str_split(x, "_"), ~.x[n])
+}
+
+api_key <- get_api_key()
+scenes <- scene_search(api_key)
+logout_usgs(api_key)
+scenes2 <- scenes |>
+  dplyr::select(cloudCover, entityId,displayId, 
+                date  = temporalCoverage.startDate) |>
+  dplyr::mutate(date = as.Date(date)) |>
+  dplyr::mutate(path_row = extract_element(displayId, 3)) |>
+  dplyr::mutate(tier = extract_element(displayId, 7))
+
+
+PR  <- wrs2d_f |> dplyr::pull(PR) |> as.character()
+
+scenes2 |>
+  dplyr::filter(path_row %in% PR) |>
+  dplyr::filter(date >= "2022-04-01") |>
+  dplyr::filter(date < "2022-07-01") |>
+  dplyr::filter(substr(displayId, 1, 4) == "LC09") |>
+  dplyr::filter(tier == "T1") |>
+  dplyr::group_by(path_row) |>
+  dplyr::filter(cloudCover == min(cloudCover)) |>
+  dplyr::pull(displayId)
+
+
+
+```
+
+# Create bulk order
+
+A bulk order was created using [EarthExplorer](https://earthexplorer.usgs.gov/).
+
+The [Landsat 8-9 OLI/TIRS C2 L2](https://doi.org/10.5066/P9OGBGM6) dataset was selected.
+
+DisplayId were inputted into the Landsat Product Identifier L2 field.
+

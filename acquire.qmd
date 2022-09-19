@@ -2,3 +2,5 @@
 title: "Acquire"
 editor: visual
 ---
+
+List the process for extracting data from data sources.

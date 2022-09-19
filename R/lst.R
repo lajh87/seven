@@ -1,3 +1,23 @@
+#' Calculate Normalised Vegetation Index (NVDI)
+#' 
+#' The normalized difference vegetation index (NDVI) is a simple graphical 
+#' indicator that can be used to analyze remote sensing measurements, often 
+#' from a space platform, assessing whether or not the target being observed 
+#' contains live green vegetation.
+#' 
+#' @param near_infrared_tif Filepath of near infrared tif file (Landsat 8/9 Band 5)
+#' @param red_tif Filepath of red tif file (Landsat 8/9 Band 4)
+calculate_nvdi <- function(near_infrared_tif, red_tif){
+  
+  red <- raster::raster(red_tif)
+  near.infrared <- raster::raster(near_infrared_tif)
+  (near.infrared - red)/(near.infrared + red)
+  
+}
+
+
+
+
 # https://downloads.hindawi.com/journals/js/2016/1480307.pdf
 # http://www.gisandbeers.com/GeoBazar/Libros/Teledeteccion/Manual-Landsat-9-Handbook.pdf
 calculate_lst <- function(b4_tif, b5_tif, b10_tif, meta){
@@ -72,3 +92,4 @@ calculate_lst <- function(b4_tif, b5_tif, b10_tif, meta){
   # Calcualte LST
   LST <- (BT / (1 + (0.0010895 * BT / 1.4388) * log(e)))
 }
+

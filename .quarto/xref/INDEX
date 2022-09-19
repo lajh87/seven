@@ -76,5 +76,11 @@
   },
   "pubs.qmd": {
     "pubs.html": "f3bdfd07"
+  },
+  "download-landsat-primary-sites.qmd": {
+    "download-landsat-primary-sites.html": "70645afd"
+  },
+  "calculate-store-nvdi.qmd": {
+    "calculate-store-nvdi.html": "c130eedd"
   }
 }

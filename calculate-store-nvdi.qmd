@@ -1,0 +1,67 @@
+---
+title: "Calculate and Store NVDI"
+editor: visual
+execute:
+  eval: false
+---
+
+Note, this file is not evaluated due to time.
+
+# Introduction
+
+This script calculates **normalized difference vegetation index** (**NDVI**) for selected Landsat tiles and uploads it to a postgis database. To save the raster the `postgis_raster` needs to have been enabled using the following query.
+
+`CREATE EXTENSION postgis_raster;`
+
+# Setup
+
+```{r}
+library(raster)
+library(rpostgis)
+library(leaflet)
+source("R/postgis.R")
+source("R/lst.R")
+```
+
+# Data
+
+```{r}
+collection <- "../../../OneDrive/Data/landsat/Product Bundles/"
+d <- list.files(collection)
+d
+```
+
+# Calculate NVDI
+
+The **normalized difference vegetation index** (**NDVI**) is a simple graphical indicator that can be used to analyze [remote sensing](https://en.wikipedia.org/wiki/Remote_sensing "Remote sensing") measurements, often from a [space platform](https://en.wikipedia.org/wiki/Artificial_satellite "Artificial satellite"), assessing whether or not the target being observed contains live green [vegetation](https://en.wikipedia.org/wiki/Vegetation "Vegetation") ([Wikipedia](https://en.wikipedia.org/wiki/Normalized_difference_vegetation_index)).
+
+```{r}
+system.time({
+  nvdi_list <- purrr::map(d, ~{
+    f <- list.files(file.path(collection, .x))
+    
+    near_infrared_tif <- f[grepl("B5.TIF", f)]
+    red_tif <- f[grepl("B4.TIF", f)]
+  
+    near_infrared_tif <- file.path(collection, .x, near_infrared_tif)
+    red_tif <- file.path(collection, .x, red_tif)
+    
+    calculate_nvdi(near_infrared_tif, red_tif)
+
+    })
+  })
+
+# user  system elapsed 
+# 83.44   16.46  102.61                          
+```
+
+```{r}
+db <- connect_postgres()
+for(i in 1:length(nvdi_list)){
+  name <- paste0("NVDI", d[i])
+  pgWriteRast(conn = db, name = name, raster = nvdi_list[[i]], overwrite = TRUE)
+
+}
+DBI::dbDisconnect(db)
+
+```

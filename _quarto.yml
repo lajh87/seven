@@ -22,9 +22,8 @@ website:
         contents:
         - text: "Acquire"
           href:   acquire.qmd
-        - section: "Basics"
+        - section: "Web Scraping"
           contents:
-           - postgis-bbox-query.qmd
            - geocode-mil-sites-from-wiki.qmd
         - section: "OpenStreetMap"
           contents:
@@ -35,20 +34,24 @@ website:
           contents:         
             - os-api.qmd
             - os-building-height.qmd
-            - os-api-mil-sites.qmd
             - os-download-buildings.qmd
+            - os-api-mil-sites.qmd
         - section: "Landsat"
           contents:
            - landsat-api.qmd
-           - calculating-lst-and-nvdi.qmd
-           - mask-clouds.qmd
-           - lst-by-building.qmd
-           - site-lst-ratio.qmd
-      
+           - download-landsat-primary-sites.qmd
+
       - title: "Exploit"
         contents:
         - exploit.qmd
-        - primary-site-analysis.qmd
+        - postgis-bbox-query.qmd
+        - section: "Landsat"
+          contents:
+          - calculate-store-nvdi.qmd
+          - calculating-lst-and-nvdi.qmd
+          - mask-clouds.qmd
+          - lst-by-building.qmd
+          - site-lst-ratio.qmd
 format:
   html:
     theme: flatly
