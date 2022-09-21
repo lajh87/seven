@@ -264,5 +264,12 @@
     "title": "Cloud Cover",
     "section": "",
     "text": "# Load the File that Corresponds to the Site Path\n\n# Clip to the Site\n\n# Calculate Cloud Cover\n\n# If more that one then select file with lowest cloud cover."
+  },
+  {
+    "objectID": "usethis.html",
+    "href": "usethis.html",
+    "title": "Usethis",
+    "section": "",
+    "text": "No, not the popular R package. Place for final code."
   }
 ]

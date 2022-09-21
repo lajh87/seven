@@ -1,0 +1,131 @@
+---
+title: "NVDI"
+editor: visual
+---
+
+# Setup
+
+```{r}
+library(sf)
+library(igraph)
+source("R/postgis.R")
+
+```
+
+# Data
+
+## RAF Main Operating Bases
+
+```{r}
+# Download Military Site Data
+db <- connect_postgres()
+sites <- st_read(db, "military_site_clusters")
+DBI::dbDisconnect(db)
+
+# Filter for RAF Main Operating Bases
+raf_mob <- c(
+  "RAF Coningsby", "RAF Marham", "RAF Lossiemouth",
+  "RAF Waddington", "RAF Brize Norton", "RAF Benson", 
+  "RAF Odiham"
+  )
+
+sites_f <- sites |> 
+  dplyr::filter(name %in% raf_mob) |>
+  dplyr::group_by(name) |>
+  dplyr::summarise(geometry = st_union(geometry)) |>
+  dplyr::mutate(site_id = 1:dplyr::n())
+
+```
+
+## Landsat Pathrow Spatial Tiles
+
+```{r}
+# Load Tiles
+wrs2d <- st_read("data/WRS2_descending_0/WRS2_descending.shp")
+
+# Clip to Areas of Inters
+wrs2d <- st_transform(wrs2d, st_crs(sites_f))
+wrs2d_clipped <- wrs2d[sites_f,]
+plot(wrs2d_clipped$geometry)
+
+wrs2d_crs <- st_crs(wrs2d)
+
+```
+
+# Processing
+
+## Define Area of Interest (AOI)
+
+Our area of interest is the 3 times the area of the site bounding box.
+
+We add the bounding box range to xmin, ymin, ymax, and ymax.
+
+I.e. if the site bounding box was $2^2$ it would become $6^2$ as we have added the range $2$ to the minimum and maximum x and y values of the bounding box.
+
+```{r}
+aoi <- purrr::map_df(1:nrow(sites_f), ~{
+  # .x <- 1 # for testing
+  bbox_sfc <- st_bbox(sites_f[.x,]) |>
+    st_as_sfc() |> # Step may not be necessary, but works.
+    st_transform(27700) # project to BNG as in meters 
+  
+  bbox_m <- st_bbox(bbox_sfc) 
+  
+  # bbox is xmin, ymin, xmax, ymax
+  xrange <- bbox_m[3] - bbox_m[1]
+  yrange <- bbox_m[4] - bbox_m[2]
+  
+  xmax <- bbox_m[3] + xrange  
+  xmin <- bbox_m[1] - xrange
+  ymax <- bbox_m[4] + yrange
+  ymin <- bbox_m[2] - yrange
+  
+  st_bbox(sites_f[.x,]) |> attributes()
+  
+  bbox <- c(xmin, ymin, xmax, ymax)
+  class(bbox) <- "bbox"
+  st_crs(bbox) <- 27700
+  
+  st_as_sfc(bbox) |>
+    st_as_sf() |>
+    dplyr::mutate(site_id = sites_f$site_id[.x]) |>
+    dplyr::rename(geometry = x)
+})
+
+
+
+```
+
+## Match AOI to Landsat Path Row Tile
+
+```{r}
+# Make same projection
+wrs2d_clipped <- st_transform(wrs2d_clipped, 4326)
+aoi <- st_transform(aoi, 4326)
+
+adj <- st_intersects(aoi, wrs2d_clipped) 
+aoi_landsat <- purrr::map_df(seq_along(adj), ~{
+  id <- aoi$site_id[.x]
+  aoi_geometry <- aoi$geometry[.x]
+  i <- adj[[.x]]
+  wrs2d_clipped[i,] |>
+    dplyr::mutate(site_id = id) |>
+    dplyr::mutate(aoi_geom = aoi_geometry)
+}) |>
+  dplyr::select(site_id, PR_, PATH, ROW, geometry, aoi_geom)
+```
+
+## Check AOI Fully Fit Inside Tile
+
+`st_within` returns TRUE if the first geometry is completely within the second geometry. ST_Within tests for the exact opposite result of `ST_Contains`. See [here](http://postgis.net/workshops/postgis-intro/spatial_relationships.html).
+
+```{r}
+aoi_landsat$aoi_within <- purrr::map_lgl(1:nrow(aoi_landsat), ~{
+  st_within(aoi_landsat$aoi_geom[.x], aoi_landsat$geometry[.x]) |>
+    unlist() == 1
+})
+
+
+```
+
+## For each available relevant landsat tile, calculate cloud cover, nvdi and lst for the aoi and store with suitable naming convention.

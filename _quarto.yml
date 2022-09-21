@@ -12,6 +12,8 @@ website:
         file: acquire.qmd
       - text: "Exploit"
         file: exploit.qmd
+      - text: "Usethis"
+        file: usethis.qmd
         
   sidebar:
       - title: "Acquire"
@@ -54,6 +56,10 @@ website:
           - mask-clouds.qmd
           - lst-by-building.qmd
           - site-lst-ratio.qmd
+      - title: "Usethis"
+        contents:
+        - usethis.qmd
+        - nvdi.qmd
 format:
   html:
     theme: flatly
